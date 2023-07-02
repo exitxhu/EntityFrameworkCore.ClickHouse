@@ -47,8 +47,7 @@ namespace ClickHouse.EntityFrameworkCore.Storage.Internal
 
         public override bool HasTables()
         {
-            return Dependencies.ExecutionStrategyFactory
-                .Create()
+            return Dependencies.ExecutionStrategy
                 .Execute(
                     _connection,
                     connection => 1 == (byte) CreateHasTablesCommand()

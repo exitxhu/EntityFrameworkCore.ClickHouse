@@ -25,7 +25,7 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
             _maxBatchSize = maxBatchSize ?? DefaultBatchSize;
         }
 
-        protected override bool CanAddCommand(ModificationCommand modificationCommand)
+        public override bool TryAddCommand(IReadOnlyModificationCommand modificationCommand)
         {
             if (ModificationCommands.Count >= _maxBatchSize)
                 return false;
@@ -38,7 +38,7 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
             return true;
         }
 
-        protected override bool IsCommandTextValid() => true;
+        protected override bool IsValid() => true;
 
         protected override void Consume(RelationalDataReader reader)
         {
@@ -52,8 +52,9 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
                     // Find the next propagating command, if any
                     int nextPropagating;
                     for (nextPropagating = commandIndex;
-                        nextPropagating < ModificationCommands.Count &&
-                        !ModificationCommands[nextPropagating].RequiresResultPropagation;
+                        nextPropagating < ModificationCommands.Count 
+                        //!ModificationCommands[nextPropagating].RequiresResultPropagation
+                        ;
                         nextPropagating++) ;
 
                     if (nextPropagating == ModificationCommands.Count)
@@ -73,8 +74,7 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
                             modificationCommand.Entries);
                     }
 
-                    var valueBufferFactory = CreateValueBufferFactory(modificationCommand.ColumnModifications);
-                    modificationCommand.PropagateResults(valueBufferFactory.Create(clickHouseReader));
+                    modificationCommand.PropagateResults(reader);
 
                     clickHouseReader.NextResult();
                 }
@@ -104,8 +104,7 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
                     // Find the next propagating command, if any
                     int nextPropagating;
                     for (nextPropagating = commandIndex;
-                        nextPropagating < ModificationCommands.Count &&
-                        !ModificationCommands[nextPropagating].RequiresResultPropagation;
+                        nextPropagating < ModificationCommands.Count;
                         nextPropagating++)
                         ;
 
@@ -127,8 +126,7 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
                         );
                     }
 
-                    var valueBufferFactory = CreateValueBufferFactory(modificationCommand.ColumnModifications);
-                    modificationCommand.PropagateResults(valueBufferFactory.Create(npgsqlReader));
+                    modificationCommand.PropagateResults(reader);
 
                     await npgsqlReader.NextResultAsync(cancellationToken);
                 }
@@ -146,56 +144,5 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
             }
         }
 
-        protected override RawSqlCommand CreateStoreCommand()
-        {
-            var commandBuilder = Dependencies.CommandBuilderFactory.Create();
-            commandBuilder.Append(GetCommandText());
-
-            var parameterValues = new Dictionary<string, object>(GetParameterCount());
-
-            // ReSharper disable once ForCanBeConvertedToForeach
-            for (var commandIndex = 0; commandIndex < ModificationCommands.Count; commandIndex++)
-            {
-                var command = ModificationCommands[commandIndex];
-                // ReSharper disable once ForCanBeConvertedToForeach
-                for (var columnIndex = 0; columnIndex < command.ColumnModifications.Count; columnIndex++)
-                {
-                    var columnModification = command.ColumnModifications[columnIndex];
-                    if (columnModification.UseCurrentValueParameter)
-                    {
-                        commandBuilder.AddParameter(
-                            columnModification.ParameterName,
-                            columnModification.ParameterName,
-                            columnModification.TypeMapping,
-                            columnModification.IsNullable);
-
-                        parameterValues.Add(columnModification.ParameterName, columnModification.Value);
-                    }
-
-                    if (columnModification.UseOriginalValueParameter)
-                    {
-                        commandBuilder.AddParameter(
-                            columnModification.OriginalParameterName,
-                            columnModification.OriginalParameterName,
-                            columnModification.TypeMapping,
-                            columnModification.IsNullable);
-
-                        parameterValues.Add(columnModification.OriginalParameterName, columnModification.OriginalValue);
-                    }
-                }
-            }
-
-            return new RawSqlCommand(commandBuilder.Build(), parameterValues);
-        }
-
-        protected override string GetCommandText()
-        {
-            for (var i = LastCachedCommandIndex + 1; i < ModificationCommands.Count; i++)
-            {
-                UpdateCachedCommandText(i);
-            }
-
-            return CachedCommandText.ToString();
-        }
     }
 }

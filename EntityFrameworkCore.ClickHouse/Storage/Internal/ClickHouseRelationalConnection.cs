@@ -41,7 +41,7 @@ namespace ClickHouse.EntityFrameworkCore.Storage.Internal
             var optionsBuilder = new DbContextOptionsBuilder();
             ((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(relationalOptions);
 
-            return new ClickHouseRelationalConnection(Dependencies.With(optionsBuilder.Options));
+            return new ClickHouseRelationalConnection(Dependencies);
         }
 
         public override IDbContextTransaction BeginTransaction(IsolationLevel isolationLevel)

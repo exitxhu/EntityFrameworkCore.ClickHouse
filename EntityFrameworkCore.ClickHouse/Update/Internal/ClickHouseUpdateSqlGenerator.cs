@@ -33,115 +33,115 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
             commandStringBuilder.Append(" DELETE");
         }
 
-        protected override void AppendUpdateCommandHeader(
-            StringBuilder commandStringBuilder,
-            string name,
-            string schema,
-            IReadOnlyList<ColumnModification> operations)
-        {
-            if (commandStringBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(commandStringBuilder));
-            }
+        //protected override void AppendUpdateCommandHeader(
+        //    StringBuilder commandStringBuilder,
+        //    string name,
+        //    string schema,
+        //    IReadOnlyList<ColumnModification> operations)
+        //{
+        //    if (commandStringBuilder == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(commandStringBuilder));
+        //    }
 
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+        //    if (name == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(name));
+        //    }
 
-            if (operations == null)
-            {
-                throw new ArgumentNullException(nameof(operations));
-            }
+        //    if (operations == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(operations));
+        //    }
             
-            commandStringBuilder.Append("ALTER TABLE ");
-            SqlGenerationHelper.DelimitIdentifier(commandStringBuilder, name, schema);
-            commandStringBuilder.Append(" UPDATE ")
-                .AppendJoin(
-                    operations,
-                    (this, name, schema),
-                    (sb, o, p) =>
-                    {
-                        var (g, n, s) = p;
-                        g.SqlGenerationHelper.DelimitIdentifier(sb, o.ColumnName);
-                        sb.Append(" = ");
-                        if (!o.UseCurrentValueParameter)
-                        {
-                            g.AppendSqlLiteral(sb, o, n, s);
-                        }
-                        else
-                        {
-                            g.SqlGenerationHelper.GenerateParameterNamePlaceholder(sb, o.ParameterName, o.ColumnType);
-                        }
-                    });
-        }
+        //    commandStringBuilder.Append("ALTER TABLE ");
+        //    SqlGenerationHelper.DelimitIdentifier(commandStringBuilder, name, schema);
+        //    commandStringBuilder.Append(" UPDATE ")
+        //        .AppendJoin(
+        //            operations,
+        //            (this, name, schema),
+        //            (sb, o, p) =>
+        //            {
+        //                var (g, n, s) = p;
+        //                g.SqlGenerationHelper.DelimitIdentifier(sb, o.ColumnName);
+        //                sb.Append(" = ");
+        //                if (!o.UseCurrentValueParameter)
+        //                {
+        //                    g.AppendSqlLiteral(sb, o, n, s);
+        //                }
+        //                else
+        //                {
+        //                    g.SqlGenerationHelper.GenerateParameterNamePlaceholder(sb, o.ParameterName, o.ColumnType);
+        //                }
+        //            });
+        //}
 
-        protected override void AppendWhereCondition(
-            StringBuilder commandStringBuilder,
-            ColumnModification columnModification,
-            bool useOriginalValue)
-        {
-            if (commandStringBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(commandStringBuilder));
-            }
+        //protected override void AppendWhereCondition(
+        //    StringBuilder commandStringBuilder,
+        //    ColumnModification columnModification,
+        //    bool useOriginalValue)
+        //{
+        //    if (commandStringBuilder == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(commandStringBuilder));
+        //    }
 
-            if (columnModification == null)
-            {
-                throw new ArgumentNullException(nameof(columnModification));
-            }
+        //    if (columnModification == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(columnModification));
+        //    }
 
-            SqlGenerationHelper.DelimitIdentifier(commandStringBuilder, columnModification.ColumnName);
+        //    SqlGenerationHelper.DelimitIdentifier(commandStringBuilder, columnModification.ColumnName);
 
-            var parameterValue = useOriginalValue
-                ? columnModification.OriginalValue
-                : columnModification.Value;
+        //    var parameterValue = useOriginalValue
+        //        ? columnModification.OriginalValue
+        //        : columnModification.Value;
 
-            if (parameterValue == null)
-            {
-                commandStringBuilder.Append(" IS NULL");
-            }
-            else
-            {
-                commandStringBuilder.Append(" = ");
-                if (!columnModification.UseCurrentValueParameter
-                    && !columnModification.UseOriginalValueParameter)
-                {
-                    AppendSqlLiteral(commandStringBuilder, columnModification, null, null);
-                }
-                else
-                {
-                    SqlGenerationHelper.GenerateParameterNamePlaceholder(
-                        commandStringBuilder, useOriginalValue
-                            ? columnModification.OriginalParameterName
-                            : columnModification.ParameterName,
-                        columnModification.ColumnType);
-                }
-            }
-        }
+        //    if (parameterValue == null)
+        //    {
+        //        commandStringBuilder.Append(" IS NULL");
+        //    }
+        //    else
+        //    {
+        //        commandStringBuilder.Append(" = ");
+        //        if (!columnModification.UseCurrentValueParameter
+        //            && !columnModification.UseOriginalValueParameter)
+        //        {
+        //            AppendSqlLiteral(commandStringBuilder, columnModification, null, null);
+        //        }
+        //        else
+        //        {
+        //            SqlGenerationHelper.GenerateParameterNamePlaceholder(
+        //                commandStringBuilder, useOriginalValue
+        //                    ? columnModification.OriginalParameterName
+        //                    : columnModification.ParameterName,
+        //                columnModification.ColumnType);
+        //        }
+        //    }
+        //}
 
-        protected override void AppendRowsAffectedWhereCondition(StringBuilder commandStringBuilder, int expectedRowsAffected)
-        {
-        }
+        //protected override void AppendRowsAffectedWhereCondition(StringBuilder commandStringBuilder, int expectedRowsAffected)
+        //{
+        //}
 
-        protected override void AppendIdentityWhereCondition(StringBuilder commandStringBuilder, ColumnModification columnModification)
-        {
-        }
+        //protected override void AppendIdentityWhereCondition(StringBuilder commandStringBuilder, ColumnModification columnModification)
+        //{
+        //}
 
-        protected override void AppendWhereAffectedClause(StringBuilder commandStringBuilder, IReadOnlyList<ColumnModification> operations)
-        {
-        }
+        //protected override void AppendWhereAffectedClause(StringBuilder commandStringBuilder, IReadOnlyList<ColumnModification> operations)
+        //{
+        //}
 
-        protected override ResultSetMapping AppendSelectAffectedCommand(
-            StringBuilder commandStringBuilder,
-            string name,
-            string schema,
-            IReadOnlyList<ColumnModification> readOperations,
-            IReadOnlyList<ColumnModification> conditionOperations,
-            int commandPosition)
-        {
-            return ResultSetMapping.NoResultSet;
-        }
+        //protected override ResultSetMapping AppendSelectAffectedCommand(
+        //    StringBuilder commandStringBuilder,
+        //    string name,
+        //    string schema,
+        //    IReadOnlyList<ColumnModification> readOperations,
+        //    IReadOnlyList<ColumnModification> conditionOperations,
+        //    int commandPosition)
+        //{
+        //    return ResultSetMapping.NoResultSet;
+        //}
 
         private void AppendSqlLiteral(StringBuilder commandStringBuilder, ColumnModification modification, string tableName, string schema)
         {
@@ -164,37 +164,37 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
             commandStringBuilder.Append(modification.TypeMapping.GenerateProviderValueSqlLiteral(modification.Value));
         }
         
-        protected override void AppendValues(StringBuilder commandStringBuilder, string name, string schema, IReadOnlyList<ColumnModification> operations)
-        {
-            if (operations.Count > 0)
-            {
-                commandStringBuilder
-                    .Append("(")
-                    .AppendJoin(
-                        operations,
-                        (this, name, schema),
-                        (sb, o, p) =>
-                        {
-                            if (o.IsWrite)
-                            {
-                                var (g, n, s) = p;
-                                if (!o.UseCurrentValueParameter)
-                                {
-                                    g.AppendSqlLiteral(sb, o, n, s);
-                                }
-                                else
-                                {
-                                    var clickHouseSqlHelper = (ClickHouseSqlGenerationHelper)g.SqlGenerationHelper;
-                                    clickHouseSqlHelper.GenerateParameterNamePlaceholder(sb, o);
-                                }
-                            }
-                            else
-                            {
-                                sb.Append("DEFAULT");
-                            }
-                        })
-                    .Append(")");
-            }
-        }
+        //protected override void AppendValues(StringBuilder commandStringBuilder, string name, string schema, IReadOnlyList<ColumnModification> operations)
+        //{
+        //    if (operations.Count > 0)
+        //    {
+        //        commandStringBuilder
+        //            .Append("(")
+        //            .AppendJoin(
+        //                operations,
+        //                (this, name, schema),
+        //                (sb, o, p) =>
+        //                {
+        //                    if (o.IsWrite)
+        //                    {
+        //                        var (g, n, s) = p;
+        //                        if (!o.UseCurrentValueParameter)
+        //                        {
+        //                            g.AppendSqlLiteral(sb, o, n, s);
+        //                        }
+        //                        else
+        //                        {
+        //                            var clickHouseSqlHelper = (ClickHouseSqlGenerationHelper)g.SqlGenerationHelper;
+        //                            clickHouseSqlHelper.GenerateParameterNamePlaceholder(sb, o);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        sb.Append("DEFAULT");
+        //                    }
+        //                })
+        //            .Append(")");
+        //    }
+        //}
     }
 }

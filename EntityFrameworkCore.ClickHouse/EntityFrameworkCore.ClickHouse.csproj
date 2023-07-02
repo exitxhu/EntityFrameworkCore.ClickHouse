@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>ClickHouse.EntityFrameworkCore</RootNamespace>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <LangVersion>9</LangVersion>
     <PackageVersion>0.0.9</PackageVersion>
     <Authors>Denis Ivanov</Authors>
@@ -14,10 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClickHouse.Client" Version="4.2.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.11" PrivateAssets="none" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="5.0.11" PrivateAssets="none" />
+    <PackageReference Include="ClickHouse.Client" Version="6.7.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.8" PrivateAssets="none" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="7.0.8" PrivateAssets="none" />
   </ItemGroup>
 
   <ItemGroup>

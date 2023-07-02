@@ -1364,6 +1364,8 @@ namespace EntityFrameworkCore.ClickHouse.FunctionalTests
 
             public int DoublePrecision { get; set; } = 8;
 
+            public override bool PreservesDateTimeKind => false;
+
             public override DbContextOptionsBuilder AddOptions(DbContextOptionsBuilder builder)
             {
                 return base.AddOptions(builder).LogTo(s => Trace.WriteLine(s));
