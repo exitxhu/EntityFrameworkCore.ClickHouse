@@ -14,7 +14,7 @@ namespace ClickHouse.EntityFrameworkCore.Storage.Internal
         {
         }
 
-        public void GenerateParameterNamePlaceholder(StringBuilder builder, ColumnModification column) =>
+        public void GenerateParameterNamePlaceholder(StringBuilder builder, IColumnModification column) =>
             this.GenerateParameterNamePlaceholder(builder, column.ParameterName, column.ColumnType);
 
         public void GenerateParameterNamePlaceholder(StringBuilder builder, string name, string type) =>

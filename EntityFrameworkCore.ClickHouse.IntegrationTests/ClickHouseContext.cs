@@ -1,8 +1,11 @@
 ﻿using ClickHouse.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using Renci.SshNet;
 using System;
+using System.Diagnostics;
 using System.Globalization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EntityFrameworkCore.ClickHouse.IntegrationTests
 {
@@ -21,7 +24,7 @@ namespace EntityFrameworkCore.ClickHouse.IntegrationTests
         public const ulong UInt64Value = 8;
 
         public int Id { get; set; }
-            
+
         public string Text { get; set; }
 
         public string FloatAsString { get; set; } = FloatValue.ToString(CultureInfo.InvariantCulture);
@@ -63,7 +66,9 @@ namespace EntityFrameworkCore.ClickHouse.IntegrationTests
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.LogTo(TestContext.WriteLine);
-            optionsBuilder.UseClickHouse("Host=localhost;Protocol=http;Port=8123;Database=" + TestContext.CurrentContext.Test.ClassName);
+            optionsBuilder.UseClickHouse($"Host=127.0.0.1;Protocol=http;Port=8443;Database=test;Username=affilio;Password=pcIslv0JbSjLGxV;");
+            //   optionsBuilder.UseClickHouse("Host=localhost;Protocol=http;Port=8123;Database=" + TestContext.CurrentContext.Test.ClassName);
+
         }
     }
 }

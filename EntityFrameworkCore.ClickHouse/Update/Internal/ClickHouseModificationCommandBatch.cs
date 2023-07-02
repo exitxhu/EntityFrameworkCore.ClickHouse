@@ -25,18 +25,19 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
             _maxBatchSize = maxBatchSize ?? DefaultBatchSize;
         }
 
-        public override bool TryAddCommand(IReadOnlyModificationCommand modificationCommand)
-        {
-            if (ModificationCommands.Count >= _maxBatchSize)
-                return false;
+        //public override bool TryAddCommand(IReadOnlyModificationCommand modificationCommand)
+        //{
+        //    if (ModificationCommands.Count >= _maxBatchSize)
+        //        return false;
 
-            var newParamCount = (long)_parameterCount + modificationCommand.ColumnModifications.Count;
-            if (newParamCount > int.MaxValue)
-                return false;
+        //    var newParamCount = (long)_parameterCount + modificationCommand.ColumnModifications.Count;
+        //    if (newParamCount > int.MaxValue)
+        //        return false;
 
-            _parameterCount = (int)newParamCount;
-            return true;
-        }
+        //    _parameterCount = (int)newParamCount;
+        //    AddCommand(modificationCommand);
+        //    return true;
+        //}
 
         protected override bool IsValid() => true;
 

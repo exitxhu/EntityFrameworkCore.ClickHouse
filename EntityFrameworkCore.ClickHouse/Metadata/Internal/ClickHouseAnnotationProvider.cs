@@ -13,10 +13,7 @@ namespace ClickHouse.EntityFrameworkCore.Metadata.Internal
 
         public override IEnumerable<IAnnotation> For(ITable table, bool designTime)
         {
-            if (!designTime)
-            {
-                yield break;
-            }
+
             var entityType = table.EntityTypeMappings.First().EntityType;
 
             foreach (var annotation in entityType.GetAnnotations()
