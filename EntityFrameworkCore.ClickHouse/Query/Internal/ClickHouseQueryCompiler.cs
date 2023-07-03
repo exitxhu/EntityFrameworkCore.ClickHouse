@@ -6,29 +6,28 @@ using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace ClickHouse.EntityFrameworkCore.Query.Internal
+namespace ClickHouse.EntityFrameworkCore.Query.Internal;
+
+public class ClickHouseQueryCompiler : QueryCompiler
 {
-    public class ClickHouseQueryCompiler : QueryCompiler
+    public ClickHouseQueryCompiler(
+        IQueryContextFactory queryContextFactory,
+        ICompiledQueryCache compiledQueryCache,
+        ICompiledQueryCacheKeyGenerator compiledQueryCacheKeyGenerator,
+        IDatabase database,
+        IDiagnosticsLogger<DbLoggerCategory.Query> logger,
+        ICurrentDbContext currentContext,
+        IEvaluatableExpressionFilter evaluatableExpressionFilter,
+        IModel model)
+        : base(
+            queryContextFactory,
+            compiledQueryCache,
+            compiledQueryCacheKeyGenerator,
+            database,
+            logger,
+            currentContext,
+            evaluatableExpressionFilter,
+            model)
     {
-        public ClickHouseQueryCompiler(
-            IQueryContextFactory queryContextFactory,
-            ICompiledQueryCache compiledQueryCache,
-            ICompiledQueryCacheKeyGenerator compiledQueryCacheKeyGenerator,
-            IDatabase database,
-            IDiagnosticsLogger<DbLoggerCategory.Query> logger,
-            ICurrentDbContext currentContext,
-            IEvaluatableExpressionFilter evaluatableExpressionFilter,
-            IModel model)
-            : base(
-                queryContextFactory,
-                compiledQueryCache,
-                compiledQueryCacheKeyGenerator,
-                database,
-                logger,
-                currentContext,
-                evaluatableExpressionFilter,
-                model)
-        {
-        }
     }
 }

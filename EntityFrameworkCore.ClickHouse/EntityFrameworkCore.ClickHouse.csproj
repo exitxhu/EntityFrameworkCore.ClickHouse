@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>ClickHouse.EntityFrameworkCore</RootNamespace>
     <TargetFramework>net7.0</TargetFramework>
-    <LangVersion>9</LangVersion>
+    <LangVersion>11</LangVersion>
     <PackageVersion>0.0.9</PackageVersion>
     <Authors>Denis Ivanov</Authors>
     <Description>ClickHouse provider for Entity Framework Core.</Description>
@@ -11,6 +11,14 @@
     <PackageIcon>Logo.png</PackageIcon>
     <RepositoryUrl>https://github.com/denis-ivanov/EntityFrameworkCore.ClickHouse</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>11.0</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>11.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
