@@ -24,6 +24,8 @@
   <ItemGroup>
     <PackageReference Include="ClickHouse.Client" Version="6.7.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8" PrivateAssets="none">
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.8" PrivateAssets="none" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="7.0.8" PrivateAssets="none" />
   </ItemGroup>

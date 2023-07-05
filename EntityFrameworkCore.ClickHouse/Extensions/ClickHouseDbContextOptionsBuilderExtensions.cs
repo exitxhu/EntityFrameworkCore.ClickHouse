@@ -25,8 +25,10 @@ public static class ClickHouseDbContextOptionsBuilderExtensions
         string connectionString,
         Action<ClickHouseDbContextOptionsBuilder> clickHouseOptionsAction = null)
     {
-        var extension = (ClickHouseOptionsExtension)GetOrCreateExtension(optionsBuilder).WithConnectionString(connectionString);
-        ((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(extension);
+        var extension = (ClickHouseOptionsExtension)GetOrCreateExtension(optionsBuilder)
+            .WithConnectionString(connectionString);
+        ((IDbContextOptionsBuilderInfrastructure)optionsBuilder)
+            .AddOrUpdateExtension(extension);
 
         ConfigureWarnings(optionsBuilder);
 

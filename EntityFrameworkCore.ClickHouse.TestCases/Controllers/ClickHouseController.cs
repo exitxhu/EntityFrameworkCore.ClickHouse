@@ -31,7 +31,8 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
                 MediaName = "asdasdf",
                 OrderId = 123,
                 PaymentStatus = OrderPaymentStatus.WaitingForInvoice,
-                RefererUserId = 1
+                RefererUserId = 1,
+                Samad = 1
             } });
             _clickHouseContext.SaveChanges();
             return Ok(_clickHouseContext.Order);

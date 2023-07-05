@@ -11,8 +11,35 @@ using ClickHouse.EntityFrameworkCore.Design.Internal;
 using ClickHouse.EntityFrameworkCore.Scaffolding.Internal;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Scaffolding;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using ClickHouse.EntityFrameworkCore.Migrations.Design;
+using Microsoft.EntityFrameworkCore.Migrations.Design;
 
 namespace EntityFrameworkCore.ClickHouse.TestCases;
+public class ClickHouseDesignTimeServices : IDesignTimeServices
+{
+    public void ConfigureDesignTimeServices(IServiceCollection services)
+    {
+        Debugger.Launch();
+        if (services == null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        services.AddEntityFrameworkClickHouse()
+            .AddSingleton<IAnnotationCodeGenerator, ClickHouseAnnotationCodeGenerator>()
+            .AddSingleton<IDatabaseModelFactory, ClickHouseDatabaseModelFactory>()
+            .AddSingleton<ICSharpHelper, ClickHouseCSharpHelper>()
+            .AddSingleton<AnnotationCodeGeneratorDependencies, AnnotationCodeGeneratorDependencies>()
+            .AddSingleton<ICSharpMigrationOperationGenerator, ClickHouseCSharpMigrationOperationGenerator>()
+
+
+
+            ;
+
+        var t = services.Where(a => a.ToString().Contains("TypeMapping")).ToList();
+    }
+}
 
 public class Program
 {
@@ -35,7 +62,6 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        Debugger.Launch();
         var t = builder.Services.BuildServiceProvider();
         var m = t.GetRequiredService<ClickHouseContext>();
         await m.Database.EnsureCreatedAsync();
@@ -53,6 +79,7 @@ public class Program
 public class ClickHouseContext : DbContext
 {
     public DbSet<Order> Order { get; set; }
+    public DbSet<Det> Dets { get; set; }
     public ClickHouseContext(DbContextOptions op) : base(op)
     {
 
@@ -63,7 +90,7 @@ public class ClickHouseContext : DbContext
         modelBuilder.Entity<Order>().Property(e => e.OrderId).ValueGeneratedNever();
 
         modelBuilder.Entity<Order>()
-            .HasMergeTreeEngine("OrderId");
+            .HasMergeTreeEngine("OrderId,MediaId");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -72,6 +99,11 @@ public class ClickHouseContext : DbContext
         //   optionsBuilder.UseClickHouse("Host=localhost;Protocol=http;Port=8123;Database=" + TestContext.CurrentContext.Test.ClassName);
 
     }
+}
+public record Det
+{
+    public int Id { get; set; }
+    public int? Null { get; set; }
 }
 public record Order
 {
