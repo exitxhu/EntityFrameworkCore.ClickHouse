@@ -1058,7 +1058,7 @@ public class ClickHouseCSharpHelper : ICSharpHelper
         }
         if (value is ClickHouseEngine a)
         {
-            var t = a.SpecifyEngine();
+            var t =$@"{a.Serialize()}";
             return t;
         }
 

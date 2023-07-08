@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -9,6 +10,7 @@ namespace ClickHouse.EntityFrameworkCore.Storage.Engines;
 
 public class MergeTreeEngine<T> : ClickHouseEngine
 {
+    
     public MergeTreeEngine([NotNull] string orderBy)
     {
         if (orderBy == null)
@@ -33,6 +35,8 @@ public class MergeTreeEngine<T> : ClickHouseEngine
 
     [AllowNull]
     public MergeTreeSettings Settings { get; set; }
+
+    public override string EngineType => ClickHouseEngineTypeConstants.MergeTreeEngine;
 
     public MergeTreeEngine<T> WithPartitionBy([NotNull] string partitionBy)
     {
@@ -83,8 +87,11 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         return this;
     }
 
-    public override string SpecifyEngine()
+    public override string Serialize()
     {
+        var res = JsonSerializer.Serialize(this);
+        return res;
+
         var builder = new IndentedStringBuilder();
         builder.Append(" ENGINE = MergeTree()").AppendLine();
 
@@ -302,4 +309,5 @@ public class MergeTreeEngine<T> : ClickHouseEngine
             }
         }
     }
+
 }

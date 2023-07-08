@@ -46,6 +46,7 @@ public static class ClickHouseServiceCollectionExtensions
             .TryAdd<IModificationCommandBatchFactory, ClickHouseModificationCommandBatchFactory>()
             .TryAdd<IRelationalConnection>(p => p.GetService<IClickHouseRelationalConnection>())
             .TryAdd<IMigrationsSqlGenerator, ClickHouseMigrationsSqlGenerator>()
+            .TryAdd<IMigrator, ClickHouseMigrator>()
             .TryAdd<IRelationalDatabaseCreator, ClickHouseDatabaseCreator>()
             .TryAdd<IHistoryRepository, ClickHouseHistoryRepository>()
             .TryAdd<IQueryCompiler, ClickHouseQueryCompiler>()

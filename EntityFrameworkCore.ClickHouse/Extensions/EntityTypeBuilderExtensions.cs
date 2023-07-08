@@ -49,7 +49,7 @@ namespace ClickHouse.EntityFrameworkCore.Extensions
             var engine = new MergeTreeEngine<T>(orderBy);
             configure(engine);
 
-            builder.Metadata.SetOrRemoveAnnotation(ClickHouseAnnotationNames.Engine, engine);
+            builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine);
             return builder;
         }
 
@@ -62,7 +62,7 @@ namespace ClickHouse.EntityFrameworkCore.Extensions
             }
 
             var engine = new StripeLogEngine();
-            builder.Metadata.SetOrRemoveAnnotation(ClickHouseAnnotationNames.Engine, engine);
+            builder.Metadata.SetOrRemoveAnnotation(ClickHouseEngineTypeConstants.StripeLogEngine, engine);
             return builder;
         }
     }

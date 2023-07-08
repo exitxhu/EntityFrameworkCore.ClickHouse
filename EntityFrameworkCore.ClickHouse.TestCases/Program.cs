@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Scaffolding;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ClickHouse.EntityFrameworkCore.Migrations.Design;
 using Microsoft.EntityFrameworkCore.Migrations.Design;
+using ClickHouse.EntityFrameworkCore.Storage.Engines;
 
 namespace EntityFrameworkCore.ClickHouse.TestCases;
 public class ClickHouseDesignTimeServices : IDesignTimeServices
@@ -34,10 +35,8 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
             .AddSingleton<ICSharpMigrationOperationGenerator, ClickHouseCSharpMigrationOperationGenerator>()
 
 
-
             ;
 
-        var t = services.Where(a => a.ToString().Contains("TypeMapping")).ToList();
     }
 }
 
@@ -45,6 +44,8 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
+        var tf = new MergeTreeEngine<Order>("");
+        var sds = ClickHouseEngineTypeConstants.MergeTreeEngine;
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
