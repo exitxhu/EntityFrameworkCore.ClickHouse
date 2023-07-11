@@ -29,7 +29,7 @@ public static class EntityTypeBuilderExtensions
     public static EntityTypeBuilder<T> HasMergeTreeEngine<T>(
         [NotNull] this EntityTypeBuilder<T> builder,
         [NotNull] string orderBy,
-        [NotNull] Action<MergeTreeEngine<T>> configure) where T : class
+        [NotNull] Action<MergeTreeEngine> configure) where T : class
     {
         if (builder == null)
         {
@@ -46,7 +46,7 @@ public static class EntityTypeBuilderExtensions
             throw new ArgumentNullException(nameof(configure));
         }
 
-        var engine = new MergeTreeEngine<T>(orderBy);
+        var engine = new MergeTreeEngine(orderBy);
         configure(engine);
 
         builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine);

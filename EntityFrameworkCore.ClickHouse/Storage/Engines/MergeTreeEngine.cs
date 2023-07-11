@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Newtonsoft.Json;
 
 namespace ClickHouse.EntityFrameworkCore.Storage.Engines;
 
-
-public class MergeTreeEngine<T> : ClickHouseEngine
+public abstract class BaseMergeTreeEngine : ClickHouseEngine
 {
-    
-    public override string EngineType => ClickHouseEngineTypeConstants.MergeTreeEngine;
-    public MergeTreeEngine([NotNull] string orderBy)
+
+    public BaseMergeTreeEngine([NotNull] string orderBy)
     {
         if (orderBy == null)
         {
@@ -38,7 +36,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
     public MergeTreeSettings Settings { get; set; }
 
 
-    public MergeTreeEngine<T> WithPartitionBy([NotNull] string partitionBy)
+    public BaseMergeTreeEngine WithPartitionBy([NotNull] string partitionBy)
     {
         if (partitionBy == null)
         {
@@ -49,7 +47,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         return this;
     }
 
-    public MergeTreeEngine<T> WithPrimaryKey([NotNull] string primaryKey)
+    public BaseMergeTreeEngine WithPrimaryKey([NotNull] string primaryKey)
     {
         if (primaryKey == null)
         {
@@ -60,7 +58,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         return this;
     }
 
-    public MergeTreeEngine<T> WithSampleBy([NotNull] string sampleBy)
+    public BaseMergeTreeEngine WithSampleBy([NotNull] string sampleBy)
     {
         if (sampleBy == null)
         {
@@ -71,7 +69,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         return this;
     }
 
-    public MergeTreeEngine<T> WithSettings([NotNull] Action<MergeTreeSettings> configure)
+    public BaseMergeTreeEngine WithSettings([NotNull] Action<MergeTreeSettings> configure)
     {
         if (configure == null)
         {
@@ -86,10 +84,19 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         configure(Settings);
         return this;
     }
+}
+public class MergeTreeEngine : BaseMergeTreeEngine
+{
+    
+    public override string EngineType => ClickHouseEngineTypeConstants.MergeTreeEngine;
+    public MergeTreeEngine([NotNull] string orderBy):base(orderBy)
+    {
+    }
+
 
     public override string Serialize()
     {
-        var res = JsonConvert.SerializeObject(this);
+        var res = JsonSerializer.Serialize(this);
         return res;
     }
 

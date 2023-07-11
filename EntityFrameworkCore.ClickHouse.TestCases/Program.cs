@@ -21,7 +21,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        Debugger.Launch();
+       // Debugger.Launch();
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
@@ -45,8 +45,6 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var tf = new MergeTreeEngine<Order>("");
-        var sds = ClickHouseEngineTypeConstants.MergeTreeEngine;
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
@@ -89,11 +87,14 @@ public class ClickHouseContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Order>().HasKey(e => e.OrderId).HasAnnotation("myann","so do");
-        modelBuilder.Entity<Order>().Property(e => e.OrderId).ValueGeneratedNever();
+        var ord = modelBuilder.Entity<Order>();
+        ord.HasKey(e => e.OrderId).HasAnnotation("myann","so do");
+        ord.Property(e => e.OrderId).ValueGeneratedNever();
+        ord.HasMergeTreeEngine("OrderId,MediaId");
+        ord.Metadata.SetAnnotation("ASSSSS", "asd");
+
+
         modelBuilder.Model.AddAnnotation("asd","Asdasd");
-        modelBuilder.Entity<Order>()
-            .HasMergeTreeEngine("OrderId,MediaId");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -107,6 +108,7 @@ public record Det
 {
     public int Id { get; set; }
     public int? Null { get; set; }
+    public bool MyBool { get; set; }
 }
 public record Order
 {

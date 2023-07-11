@@ -20,5 +20,12 @@ public class ClickHouseMigrationsAnnotationProvider : MigrationsAnnotationProvid
     {
         return base.ForRemove(table);
     }
-
+    public override IEnumerable<IAnnotation> ForRemove(IColumn column)
+    {
+        return base.ForRemove(column);
+    }
+    public override IEnumerable<IAnnotation> ForRename(IColumn column)
+    {
+        return base.ForRename(column);
+    }
 }

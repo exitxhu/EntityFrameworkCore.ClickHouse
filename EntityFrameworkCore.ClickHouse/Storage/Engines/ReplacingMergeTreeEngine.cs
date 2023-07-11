@@ -5,84 +5,14 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ClickHouse.EntityFrameworkCore.Storage.Engines;
-
-public class ReplacingMergeTreeEngine<T> : ClickHouseEngine
+public class ReplacingMergeTreeEngine : BaseMergeTreeEngine
 {
-    public ReplacingMergeTreeEngine([NotNull] string orderBy) 
+    public ReplacingMergeTreeEngine([NotNull] string orderBy) :base(orderBy)
     {
-        if (orderBy == null)
-        {
-            throw new ArgumentNullException(nameof(orderBy));
-        }
-
-        OrderBy = orderBy;
     }
 
     public override string EngineType => ClickHouseEngineTypeConstants.ReplacingMergeTreeEngine;
-    [NotNull]
-    public string OrderBy { get; set; }
-
-    [AllowNull]
-    public string PartitionBy { get; set; }
-
-    [AllowNull]
-    public string PrimaryKey { get; set; }
-
-    [AllowNull]
-    public string SampleBy { get; set; }
-
-    [AllowNull]
-    public MergeTreeSettings Settings { get; set; }
-
-
-    public ReplacingMergeTreeEngine<T> WithPartitionBy([NotNull] string partitionBy)
-    {
-        if (partitionBy == null)
-        {
-            throw new ArgumentNullException(nameof(partitionBy));
-        }
-
-        PartitionBy = partitionBy;
-        return this;
-    }
-
-    public ReplacingMergeTreeEngine<T> WithPrimaryKey([NotNull] string primaryKey)
-    {
-        if (primaryKey == null)
-        {
-            throw new ArgumentNullException(nameof(primaryKey));
-        }
-
-        PrimaryKey = primaryKey;
-        return this;
-    }
-
-    public ReplacingMergeTreeEngine<T> WithSampleBy([NotNull] string sampleBy)
-    {
-        if (sampleBy == null)
-        {
-            throw new ArgumentNullException(nameof(sampleBy));
-        }
-
-        SampleBy = sampleBy;
-        return this;
-    }
-
-    public ReplacingMergeTreeEngine<T> WithSettings([NotNull] Action<MergeTreeSettings> configure)
-    {
-        if (configure == null)
-        {
-            throw new ArgumentNullException(nameof(configure));
-        }
-
-        if (Settings == null)
-        {
-            Settings = new MergeTreeSettings();
-        }
-
-        configure(Settings);
-        return this;
-    }
+   
 
     public override string Serialize()
     {

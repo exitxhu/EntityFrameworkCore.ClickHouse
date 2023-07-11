@@ -37,8 +37,8 @@ public class ClickHouseEngineTypeConstants
     {
         types = new Dictionary<string, Type>()
         {
-            { MergeTreeEngine, typeof(MergeTreeEngine<>) },
-            { ReplacingMergeTreeEngine, typeof(ReplacingMergeTreeEngine<>) },
+            { MergeTreeEngine, typeof(MergeTreeEngine) },
+            { ReplacingMergeTreeEngine, typeof(ReplacingMergeTreeEngine) },
             { StripeLogEngine, typeof(StripeLogEngine) },
         };
     }
