@@ -28,6 +28,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.8" PrivateAssets="none" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="7.0.8" PrivateAssets="none" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>

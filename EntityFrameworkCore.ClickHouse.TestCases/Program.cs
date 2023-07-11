@@ -33,6 +33,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
             .AddSingleton<ICSharpHelper, ClickHouseCSharpHelper>()
             .AddSingleton<AnnotationCodeGeneratorDependencies, AnnotationCodeGeneratorDependencies>()
             .AddSingleton<ICSharpMigrationOperationGenerator, ClickHouseCSharpMigrationOperationGenerator>()
+            .AddSingleton<IMigrationsCodeGenerator, ClickHouseCSharpMigrationsGenerator>()
 
 
             ;
@@ -66,6 +67,7 @@ public class Program
         var t = builder.Services.BuildServiceProvider();
         var m = t.GetRequiredService<ClickHouseContext>();
         await m.Database.EnsureCreatedAsync();
+        await m.Database.MigrateAsync();
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
@@ -87,9 +89,9 @@ public class ClickHouseContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Order>().HasKey(e => e.OrderId);
+        modelBuilder.Entity<Order>().HasKey(e => e.OrderId).HasAnnotation("myann","so do");
         modelBuilder.Entity<Order>().Property(e => e.OrderId).ValueGeneratedNever();
-
+        modelBuilder.Model.AddAnnotation("asd","Asdasd");
         modelBuilder.Entity<Order>()
             .HasMergeTreeEngine("OrderId,MediaId");
     }
@@ -112,7 +114,8 @@ public record Order
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long OrderId { get; set; }
 
-    public new int MediaId { get; set; }
+    public int MediaId { get; set; }
+    public int LinkId { get; set; }
     public DateTime? LastStatusUpdateDate { get; set; }
 
     public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.WaitingForInvoice;

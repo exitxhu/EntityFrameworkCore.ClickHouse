@@ -1058,7 +1058,7 @@ public class ClickHouseCSharpHelper : ICSharpHelper
         }
         if (value is ClickHouseEngine a)
         {
-            var t =$@"{a.Serialize()}";
+            var t = "\"" + a.Serialize().Replace("\"","\"+\"") + "\"";
             return t;
         }
 

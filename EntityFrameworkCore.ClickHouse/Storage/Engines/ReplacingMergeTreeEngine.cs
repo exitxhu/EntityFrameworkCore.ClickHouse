@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Newtonsoft.Json;
 
 namespace ClickHouse.EntityFrameworkCore.Storage.Engines;
 
-
-public class MergeTreeEngine<T> : ClickHouseEngine
+public class ReplacingMergeTreeEngine<T> : ClickHouseEngine
 {
-    
-    public override string EngineType => ClickHouseEngineTypeConstants.MergeTreeEngine;
-    public MergeTreeEngine([NotNull] string orderBy)
+    public ReplacingMergeTreeEngine([NotNull] string orderBy) 
     {
         if (orderBy == null)
         {
@@ -22,6 +18,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         OrderBy = orderBy;
     }
 
+    public override string EngineType => ClickHouseEngineTypeConstants.ReplacingMergeTreeEngine;
     [NotNull]
     public string OrderBy { get; set; }
 
@@ -38,7 +35,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
     public MergeTreeSettings Settings { get; set; }
 
 
-    public MergeTreeEngine<T> WithPartitionBy([NotNull] string partitionBy)
+    public ReplacingMergeTreeEngine<T> WithPartitionBy([NotNull] string partitionBy)
     {
         if (partitionBy == null)
         {
@@ -49,7 +46,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         return this;
     }
 
-    public MergeTreeEngine<T> WithPrimaryKey([NotNull] string primaryKey)
+    public ReplacingMergeTreeEngine<T> WithPrimaryKey([NotNull] string primaryKey)
     {
         if (primaryKey == null)
         {
@@ -60,7 +57,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         return this;
     }
 
-    public MergeTreeEngine<T> WithSampleBy([NotNull] string sampleBy)
+    public ReplacingMergeTreeEngine<T> WithSampleBy([NotNull] string sampleBy)
     {
         if (sampleBy == null)
         {
@@ -71,7 +68,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
         return this;
     }
 
-    public MergeTreeEngine<T> WithSettings([NotNull] Action<MergeTreeSettings> configure)
+    public ReplacingMergeTreeEngine<T> WithSettings([NotNull] Action<MergeTreeSettings> configure)
     {
         if (configure == null)
         {
@@ -89,13 +86,13 @@ public class MergeTreeEngine<T> : ClickHouseEngine
 
     public override string Serialize()
     {
-        var res = JsonConvert.SerializeObject(this);
+        var res = JsonSerializer.Serialize(this);
         return res;
     }
 
     public override void SpecifyEngine(MigrationCommandListBuilder builder, IModel model)
     {
-        builder.Append(" ENGINE = MergeTree()").AppendLine();
+        builder.Append(" ENGINE = ReplacingMergeTree()").AppendLine();
 
         if (OrderBy != null)
         {
@@ -156,7 +153,7 @@ public class MergeTreeEngine<T> : ClickHouseEngine
 
                 if (Settings.MergeWithTtlTimeout != MergeTreeSettings.DefaultMergeWithTtlTimeout)
                 {
-                    builder.AppendLine("merge_with_ttl_timeout = " + (int) Settings.MergeWithTtlTimeout.TotalSeconds);
+                    builder.AppendLine("merge_with_ttl_timeout = " + (int)Settings.MergeWithTtlTimeout.TotalSeconds);
                 }
 
                 if (Settings.WriteFinalMark != MergeTreeSettings.DefaultWriteFinalMark)

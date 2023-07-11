@@ -4,6 +4,7 @@ using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using System.Linq;
 
 namespace ClickHouse.EntityFrameworkCore.Migrations;
 
@@ -65,9 +66,9 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     protected override void Generate(CreateTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
         base.Generate(operation, model, builder, false);
-        var engineAnnotation = operation.FindAnnotation(ClickHouseAnnotationNames.Engine);
+        var engineAnnotation = operation.GetAnnotations().FirstOrDefault(a=> a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
         var engine = engineAnnotation != null && engineAnnotation.Value != null
-            ? (ClickHouseEngine)engineAnnotation.Value
+            ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(),engineAnnotation.Name)
             : new StripeLogEngine();
 
         engine.SpecifyEngine(builder, model);

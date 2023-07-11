@@ -4,6 +4,8 @@ using System.IO;
 using System.Text;
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ClickHouse.EntityFrameworkCore.Migrations.Internal;
 
@@ -67,13 +69,7 @@ public class ClickHouseHistoryRepository : HistoryRepository
     {
         var stringTypeMapping = Dependencies.TypeMappingSource.GetMapping(typeof(string));
 
-        var builder = new StringBuilder()
-            .Append("IF OBJECT_ID(")
-            .Append(
-                stringTypeMapping.GenerateSqlLiteral(
-                    SqlGenerationHelper.DelimitIdentifier(TableName, TableSchema)))
-            .AppendLine(") IS NULL")
-            .AppendLine("BEGIN");
+        var builder = new StringBuilder();
 
         using (var reader = new StringReader(GetCreateScript()))
         {
@@ -99,10 +95,6 @@ public class ClickHouseHistoryRepository : HistoryRepository
             }
         }
 
-        builder
-            .AppendLine()
-            .Append("END")
-            .AppendLine(SqlGenerationHelper.StatementTerminator);
 
         return builder.ToString();
     }
