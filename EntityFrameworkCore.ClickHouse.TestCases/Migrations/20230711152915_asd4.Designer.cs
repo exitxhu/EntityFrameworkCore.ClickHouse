@@ -4,6 +4,7 @@ using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using EntityFrameworkCore.ClickHouse.TestCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityFrameworkCore.ClickHouse.TestCases.Migrations
 {
     [DbContext(typeof(ClickHouseContext))]
-    partial class ClickHouseContextModelSnapshot : ModelSnapshot
+    [Migration("20230711152915_asd4")]
+    partial class asd4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

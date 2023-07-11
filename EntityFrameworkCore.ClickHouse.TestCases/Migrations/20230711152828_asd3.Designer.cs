@@ -4,6 +4,7 @@ using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using EntityFrameworkCore.ClickHouse.TestCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityFrameworkCore.ClickHouse.TestCases.Migrations
 {
     [DbContext(typeof(ClickHouseContext))]
-    partial class ClickHouseContextModelSnapshot : ModelSnapshot
+    [Migration("20230711152828_asd3")]
+    partial class asd3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,12 +52,12 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Migrations
                         .IsRequired()
                         .HasColumnType("String");
 
+                    b.Property<int>("MediaId")
+                        .HasColumnType("Int32");
+
                     b.Property<string>("MediaName")
                         .IsRequired()
                         .HasColumnType("String");
-
-                    b.Property<int>("MediaaaaId")
-                        .HasColumnType("Int32");
 
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("Int32");
@@ -64,9 +67,6 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Migrations
 
                     b.Property<long?>("Samad")
                         .HasColumnType("Int64");
-
-                    b.Property<int>("ShortId")
-                        .HasColumnType("Int32");
 
                     b.HasKey("OrderId")
                         .HasAnnotation("myann", "so do");

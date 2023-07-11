@@ -27,7 +27,7 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
             {
                 LastStatusUpdateDate = DateTime.Now,
                 LinkName = "asd",
-                MediaId = 123,
+                MediaaaaId = 123,
                 MediaName = "asdasdf",
                 OrderId = 123,
                 PaymentStatus = OrderPaymentStatus.WaitingForInvoice,

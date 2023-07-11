@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.ClickHo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.ClickHouse.FunctionalTests", "EntityFrameworkCore.ClickHouse.FunctionalTests\EntityFrameworkCore.ClickHouse.FunctionalTests.csproj", "{301736C0-2341-4C89-87E2-A6492FB00705}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkCore.ClickHouse.TestCases", "EntityFrameworkCore.ClickHouse.TestCases\EntityFrameworkCore.ClickHouse.TestCases.csproj", "{7A44A175-91C1-4E42-90FD-AC4809BE941E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.ClickHouse.TestCases", "EntityFrameworkCore.ClickHouse.TestCases\EntityFrameworkCore.ClickHouse.TestCases.csproj", "{7A44A175-91C1-4E42-90FD-AC4809BE941E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{214E1C75-E6D9-4683-B608-BD29BEF3FA1C}"
+	ProjectSection(SolutionItems) = preProject
+		TODO.md = TODO.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

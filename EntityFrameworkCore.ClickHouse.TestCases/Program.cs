@@ -115,9 +115,8 @@ public record Order
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long OrderId { get; set; }
-
-    public int MediaId { get; set; }
-    public int LinkId { get; set; }
+    public int ShortId { get; set; }
+    public int MediaaaaId { get; set; }
     public DateTime? LastStatusUpdateDate { get; set; }
 
     public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.WaitingForInvoice;
