@@ -13,6 +13,7 @@ using System.Text;
 using System.Collections;
 using Microsoft.EntityFrameworkCore.Internal;
 using ClickHouse.EntityFrameworkCore.Storage.Engines;
+using ClickHouse.EntityFrameworkCore.Metadata;
 
 namespace ClickHouse.EntityFrameworkCore.Design.Internal;
 
@@ -1058,10 +1059,13 @@ public class ClickHouseCSharpHelper : ICSharpHelper
         }
         if (value is ClickHouseEngine a)
         {
-            var t = @$"""{a.Serialize().Replace(@"""","\\\"")} """;
+            var t = @$"""{a.Serialize().Replace(@"""", "\\\"")} """;
             return t;
         }
-
+        if (value is ClickHouseTableCreationStrategyAttribute b)
+        {
+            return b.Strategy.ToString();
+        }
         throw new InvalidOperationException(DesignStrings.UnknownLiteral(literalType));
     }
 

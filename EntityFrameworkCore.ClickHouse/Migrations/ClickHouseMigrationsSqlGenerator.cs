@@ -24,7 +24,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
             .Append(" ")
             .Append(operation.IsNullable && !operation.ClrType.IsArray ? $" Nullable({columnType})" : columnType);
     }
-    
+
     protected override void Generate(MigrationOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
         if (operation is ClickHouseCreateDatabaseOperation cdo)
@@ -38,7 +38,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
             Generate(ddo, model, builder);
             return;
         }
-        
+
         base.Generate(operation, model, builder);
     }
 
@@ -66,16 +66,38 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
 
     protected override void Generate(CreateTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
-        base.Generate(operation, model, builder, false);
+        builder
+            .Append("CREATE TABLE ")
+            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Name, operation.Schema))
+            .AppendLine(" (");
+
+        using (builder.Indent())
+        {
+            CreateTableColumns(operation, model, builder);
+            CreateTableConstraints(operation, model, builder);
+            builder.AppendLine();
+        }
+
+        builder.Append(")");
+
+        if (terminate)
+        {
+            builder.AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator);
+            EndStatement(builder);
+        }
         var models = model.GetEntityTypes();
-        var ts = models.FirstOrDefault(a => a.GetTableName()== operation.Name);
-        var engineAnnotation = ts.GetAnnotations().FirstOrDefault(a=> a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
+        var ts = models.FirstOrDefault(a => a.GetTableName() == operation.Name);
+        var engineAnnotation = ts.GetAnnotations().FirstOrDefault(a => a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
         var engine = engineAnnotation != null && engineAnnotation.Value != null
-            ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(),engineAnnotation.Name)
+            ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(), engineAnnotation.Name)
             : new StripeLogEngine();
 
         engine.SpecifyEngine(builder, model);
         builder.AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator);
         EndStatement(builder);
+    }
+    protected override void Generate(RenameColumnOperation operation, IModel model, MigrationCommandListBuilder builder)
+    {
+        base.Generate(operation, model, builder);
     }
 }

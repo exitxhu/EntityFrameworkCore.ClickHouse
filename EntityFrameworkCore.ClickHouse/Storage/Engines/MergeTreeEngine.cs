@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -6,85 +7,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ClickHouse.EntityFrameworkCore.Storage.Engines;
-
-public abstract class BaseMergeTreeEngine : ClickHouseEngine
-{
-
-    public BaseMergeTreeEngine([NotNull] string orderBy)
-    {
-        if (orderBy == null)
-        {
-            throw new ArgumentNullException(nameof(orderBy));
-        }
-
-        OrderBy = orderBy;
-    }
-
-    [NotNull]
-    public string OrderBy { get; set; }
-
-    [AllowNull]
-    public string PartitionBy { get; set; }
-
-    [AllowNull]
-    public string PrimaryKey { get; set; }
-
-    [AllowNull]
-    public string SampleBy { get; set; }
-
-    [AllowNull]
-    public MergeTreeSettings Settings { get; set; }
-
-
-    public BaseMergeTreeEngine WithPartitionBy([NotNull] string partitionBy)
-    {
-        if (partitionBy == null)
-        {
-            throw new ArgumentNullException(nameof(partitionBy));
-        }
-
-        PartitionBy = partitionBy;
-        return this;
-    }
-
-    public BaseMergeTreeEngine WithPrimaryKey([NotNull] string primaryKey)
-    {
-        if (primaryKey == null)
-        {
-            throw new ArgumentNullException(nameof(primaryKey));
-        }
-
-        PrimaryKey = primaryKey;
-        return this;
-    }
-
-    public BaseMergeTreeEngine WithSampleBy([NotNull] string sampleBy)
-    {
-        if (sampleBy == null)
-        {
-            throw new ArgumentNullException(nameof(sampleBy));
-        }
-
-        SampleBy = sampleBy;
-        return this;
-    }
-
-    public BaseMergeTreeEngine WithSettings([NotNull] Action<MergeTreeSettings> configure)
-    {
-        if (configure == null)
-        {
-            throw new ArgumentNullException(nameof(configure));
-        }
-
-        if (Settings == null)
-        {
-            Settings = new MergeTreeSettings();
-        }
-
-        configure(Settings);
-        return this;
-    }
-}
 public class MergeTreeEngine : BaseMergeTreeEngine
 {
     
@@ -209,4 +131,20 @@ public class MergeTreeEngine : BaseMergeTreeEngine
         }
     }
 
+}
+public class PostgreSQLEngine : ClickHouseEngine
+{
+    public override string EngineType => ClickHouseEngineTypeConstants.PostgreSQLEngine;
+
+    public override string Serialize()
+    {
+        var res = JsonSerializer.Serialize(this);
+        return res;
+    }
+
+    public override void SpecifyEngine(MigrationCommandListBuilder builder, IModel model)
+    {
+        builder.Append($" ENGINE = PostgreSQL('host:port', 'database', 'table', 'user', 'password'[, `schema`])").AppendLine();
+
+    }
 }

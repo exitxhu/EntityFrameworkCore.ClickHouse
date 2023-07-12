@@ -40,11 +40,13 @@ public class ClickHouseEngineTypeConstants
             { MergeTreeEngine, typeof(MergeTreeEngine) },
             { ReplacingMergeTreeEngine, typeof(ReplacingMergeTreeEngine) },
             { StripeLogEngine, typeof(StripeLogEngine) },
+            { PostgreSQLEngine, typeof(PostgreSQLEngine) },
         };
     }
     public static string MergeTreeEngine = engineNamer(nameof(MergeTreeEngine));
     public static string ReplacingMergeTreeEngine = engineNamer(nameof(ReplacingMergeTreeEngine));
     public static string StripeLogEngine = engineNamer(nameof(StripeLogEngine));
+    public static string PostgreSQLEngine = engineNamer(nameof(PostgreSQLEngine));
 
     public static Type GetEngineType(string type)
     {

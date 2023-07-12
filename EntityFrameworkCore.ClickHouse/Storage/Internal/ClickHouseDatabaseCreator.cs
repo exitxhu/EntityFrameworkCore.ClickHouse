@@ -8,110 +8,109 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
-namespace ClickHouse.EntityFrameworkCore.Storage.Internal
+namespace ClickHouse.EntityFrameworkCore.Storage.Internal;
+
+public class ClickHouseDatabaseCreator : RelationalDatabaseCreator
 {
-    public class ClickHouseDatabaseCreator : RelationalDatabaseCreator
+    private const int DatabaseDoesNotExist = 81;
+    
+    private readonly IClickHouseRelationalConnection _connection;
+    
+    private readonly IRawSqlCommandBuilder _rawSqlCommandBuilder;
+
+    public ClickHouseDatabaseCreator(
+        RelationalDatabaseCreatorDependencies dependencies,
+        IClickHouseRelationalConnection connection,
+        IRawSqlCommandBuilder rawSqlCommandBuilder) : base(dependencies)
     {
-        private const int DatabaseDoesNotExist = 81;
-        
-        private readonly IClickHouseRelationalConnection _connection;
-        
-        private readonly IRawSqlCommandBuilder _rawSqlCommandBuilder;
+        _connection = connection;
+        _rawSqlCommandBuilder = rawSqlCommandBuilder;
+    }
 
-        public ClickHouseDatabaseCreator(
-            RelationalDatabaseCreatorDependencies dependencies,
-            IClickHouseRelationalConnection connection,
-            IRawSqlCommandBuilder rawSqlCommandBuilder) : base(dependencies)
+    public override bool Exists()
+    {
+        try
         {
-            _connection = connection;
-            _rawSqlCommandBuilder = rawSqlCommandBuilder;
+            _connection.Open();
+            return true;
         }
-
-        public override bool Exists()
+        catch (ClickHouseServerException e)
         {
-            try
+            if (e.ErrorCode == DatabaseDoesNotExist)
             {
-                _connection.Open();
-                return true;
+                return false;
             }
-            catch (ClickHouseServerException e)
-            {
-                if (e.ErrorCode == DatabaseDoesNotExist)
-                {
-                    return false;
-                }
 
-                throw;
+            throw;
+        }
+    }
+
+    public override bool HasTables()
+    {
+        return Dependencies.ExecutionStrategy
+            .Execute(
+                _connection,
+                connection => 1 == (byte) CreateHasTablesCommand()
+                    .ExecuteScalar(
+                        new RelationalCommandParameterObject(
+                            connection,
+                            null,
+                            null,
+                            Dependencies.CurrentContext.Context,
+                            Dependencies.CommandLogger)));
+    }
+
+    public override void Create()
+    {
+        Dependencies.MigrationCommandExecutor.ExecuteNonQuery(
+            CreateCreateOperations(),
+            _connection.CreateMasterConnection());
+    }
+
+    public override void Delete()
+    {
+        using var masterConnection = _connection.CreateMasterConnection();
+        Dependencies.MigrationCommandExecutor.ExecuteNonQuery(CreateDropCommands(), masterConnection);
+    }
+
+    public override async Task DeleteAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        await using var masterConnection = _connection.CreateMasterConnection();
+        await Dependencies.MigrationCommandExecutor.ExecuteNonQueryAsync(CreateDropCommands(), masterConnection, cancellationToken);
+    }
+
+    IReadOnlyList<MigrationCommand> CreateCreateOperations()
+    {
+        var operations = new[]
+        {
+            new ClickHouseCreateDatabaseOperation
+            {
+                Name = _connection.DbConnection.Database
             }
-        }
+        };
+        return Dependencies.MigrationsSqlGenerator.Generate(operations);
+    }
 
-        public override bool HasTables()
+    IReadOnlyList<MigrationCommand> CreateDropCommands()
+    {
+        var operations = new MigrationOperation[]
         {
-            return Dependencies.ExecutionStrategy
-                .Execute(
-                    _connection,
-                    connection => 1 == (byte) CreateHasTablesCommand()
-                        .ExecuteScalar(
-                            new RelationalCommandParameterObject(
-                                connection,
-                                null,
-                                null,
-                                Dependencies.CurrentContext.Context,
-                                Dependencies.CommandLogger)));
-        }
-
-        public override void Create()
-        {
-            Dependencies.MigrationCommandExecutor.ExecuteNonQuery(
-                CreateCreateOperations(),
-                _connection.CreateMasterConnection());
-        }
-
-        public override void Delete()
-        {
-            using var masterConnection = _connection.CreateMasterConnection();
-            Dependencies.MigrationCommandExecutor.ExecuteNonQuery(CreateDropCommands(), masterConnection);
-        }
-
-        public override async Task DeleteAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            await using var masterConnection = _connection.CreateMasterConnection();
-            await Dependencies.MigrationCommandExecutor.ExecuteNonQueryAsync(CreateDropCommands(), masterConnection, cancellationToken);
-        }
-
-        IReadOnlyList<MigrationCommand> CreateCreateOperations()
-        {
-            var operations = new[]
+            new ClickHouseDropDatabaseOperation
             {
-                new ClickHouseCreateDatabaseOperation
-                {
-                    Name = _connection.DbConnection.Database
-                }
-            };
-            return Dependencies.MigrationsSqlGenerator.Generate(operations);
-        }
+                Name = _connection.DbConnection.Database
+            }
+        };
 
-        IReadOnlyList<MigrationCommand> CreateDropCommands()
-        {
-            var operations = new MigrationOperation[]
-            {
-                new ClickHouseDropDatabaseOperation
-                {
-                    Name = _connection.DbConnection.Database
-                }
-            };
-
-            return Dependencies.MigrationsSqlGenerator.Generate(operations);
-        }
-        
-        IRelationalCommand CreateHasTablesCommand()
-        {
-            var sql = $@"
+        return Dependencies.MigrationsSqlGenerator.Generate(operations);
+    }
+    
+    IRelationalCommand CreateHasTablesCommand()
+    {
+        var sql = $@"
 SELECT if(COUNT() = 0, 0, 1)
 FROM system.tables
 WHERE database = '{Dependencies.Connection.DbConnection.Database}';";
 
-            return _rawSqlCommandBuilder.Build(sql);
-        }
+        return _rawSqlCommandBuilder.Build(sql);
     }
 }
