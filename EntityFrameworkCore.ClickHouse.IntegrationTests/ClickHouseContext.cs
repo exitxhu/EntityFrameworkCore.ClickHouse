@@ -29,7 +29,8 @@ public class ClickHouseContext : DbContext
         modelBuilder.Entity<SimpleEntity>().Property(e => e.Id).ValueGeneratedNever();
 
         modelBuilder.Entity<SimpleEntity>()
-            .HasMergeTreeEngine("Id");
+            .HasMergeTreeEngine()
+            .HasOrderBy(a => a.Id);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

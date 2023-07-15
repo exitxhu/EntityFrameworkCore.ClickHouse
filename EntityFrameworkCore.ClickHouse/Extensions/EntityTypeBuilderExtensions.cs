@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using ClickHouse.EntityFrameworkCore.Metadata;
 using ClickHouse.EntityFrameworkCore.Storage.Engines;
+using ClickHouse.EntityFrameworkCore.Storage.Engines.Configur;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,9 +15,8 @@ namespace ClickHouse.EntityFrameworkCore.Extensions;
 
 public static class EntityTypeBuilderExtensions
 {
-    public static EntityTypeBuilder<T> HasMergeTreeEngine<T>(
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasMergeTreeEngine<T>(
     [NotNull] this EntityTypeBuilder<T> builder,
-    [NotNull] Expression<Func<T, object>> orderBy,
     Action<MergeTreeEngine> configure = null)
         where T : class
     {
@@ -25,22 +25,45 @@ public static class EntityTypeBuilderExtensions
             throw new ArgumentNullException(nameof(builder));
         }
 
-        if (orderBy == null)
-        {
-            throw new ArgumentNullException(nameof(orderBy));
-        }
-        string result = orderBy.Body is MemberExpression mem
-            ? mem.MemberObject()
-            : orderBy.Body is NewExpression nex
-                ? nex.AnynomousObject()
-                : throw new Exception("Clickhouse table, Expression type is not valid in this context");
+        var engine = new MergeTreeEngine();
 
-        return builder.HasMergeTreeEngine(result, configure);
+        if (configure != null)
+            configure(engine);
+        builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine.Serialize());
+
+        return new()
+        {
+            Builder = builder,
+            Engine = engine,
+        };
     }
-    public static EntityTypeBuilder<T> HasMergeTreeEngine<T>(
-        [NotNull] this EntityTypeBuilder<T> builder,
-        [NotNull] string orderBy,
-        Action<MergeTreeEngine> configure = null) where T : class
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasReplacingMergeTreeEngine<T>(
+   [NotNull] this EntityTypeBuilder<T> builder,
+   Action<ReplacingMergeTreeEngine> configure = null)
+       where T : class
+    {
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+
+        var engine = new ReplacingMergeTreeEngine();
+
+        if (configure != null)
+            configure(engine);
+        builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine.Serialize());
+
+        return new()
+        {
+            Builder = builder,
+            Engine = engine,
+        };
+    }
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasOrderBy<T>(
+        [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
+        [NotNull] Expression<Func<T, object>> orderBy)
+   where T : class
     {
         if (builder == null)
         {
@@ -51,20 +74,84 @@ public static class EntityTypeBuilderExtensions
         {
             throw new ArgumentNullException(nameof(orderBy));
         }
-
-        if (configure == null)
-        {
-            throw new ArgumentNullException(nameof(configure));
-        }
-
-        var engine = new MergeTreeEngine(orderBy);
-        if (configure != null)
-            configure(engine);
-
-        builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine.Serialize());
+        string orderByString = orderBy.Body is MemberExpression mem
+            ? mem.MemberObject()
+            : orderBy.Body is NewExpression nex
+                ? nex.AnynomousObject()
+                : throw new Exception("Clickhouse table, Expression type is not valid in this context");
+        builder.Engine.OrderBy = orderByString;
+        builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
         return builder;
     }
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPartitionBy<T>(
+        [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
+        [NotNull] Expression<Func<T, object>> PartitionBy)
+   where T : class
+    {
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
 
+        if (PartitionBy == null)
+        {
+            throw new ArgumentNullException(nameof(PartitionBy));
+        }
+        string partitionByString = PartitionBy.Body is MemberExpression mem
+            ? mem.MemberObject()
+            : PartitionBy.Body is NewExpression nex
+                ? nex.AnynomousObject()
+                : throw new Exception("Clickhouse table, Expression type is not valid in this context");
+        builder.Engine.PartitionBy = partitionByString;
+        builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
+        return builder;
+    }
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPrimaryKey<T>(
+        [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
+        [NotNull] Expression<Func<T, object>> PrimaryKey)
+   where T : class
+    {
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+        if (PrimaryKey == null)
+        {
+            throw new ArgumentNullException(nameof(PrimaryKey));
+        }
+        string PrimaryKeyString = PrimaryKey.Body is MemberExpression mem
+            ? mem.MemberObject()
+            : PrimaryKey.Body is NewExpression nex
+                ? nex.AnynomousObject()
+                : throw new Exception("Clickhouse table, Expression type is not valid in this context");
+        builder.Engine.PrimaryKey = PrimaryKeyString;
+        builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
+        return builder;
+    }
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasSampleBy<T>(
+        [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
+        [NotNull] Expression<Func<T, object>> SampleBy)
+   where T : class
+    {
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+        if (SampleBy == null)
+        {
+            throw new ArgumentNullException(nameof(SampleBy));
+        }
+        string PrimaryKeyString = SampleBy.Body is MemberExpression mem
+            ? mem.MemberObject()
+            : SampleBy.Body is NewExpression nex
+                ? nex.AnynomousObject()
+                : throw new Exception("Clickhouse table, Expression type is not valid in this context");
+        builder.Engine.SampleBy = PrimaryKeyString;
+        builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
+        return builder;
+    }
     public static EntityTypeBuilder<T> HasStripeLogEngine<T>([NotNull] this EntityTypeBuilder<T> builder)
         where T : class
     {

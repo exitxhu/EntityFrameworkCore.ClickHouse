@@ -5,7 +5,10 @@ namespace ClickHouse.EntityFrameworkCore.Storage.Engines;
 
 public abstract class BaseMergeTreeEngine : ClickHouseEngine
 {
+    public BaseMergeTreeEngine()
+    {
 
+    }
     public BaseMergeTreeEngine([NotNull] string orderBy)
     {
         if (orderBy == null)
@@ -29,7 +32,7 @@ public abstract class BaseMergeTreeEngine : ClickHouseEngine
     public string SampleBy { get; set; }
 
     [AllowNull]
-    public MergeTreeSettings Settings { get; set; }
+    public MergeTreeSettings Settings { get; set; } = new MergeTreeSettings();
 
 
     public BaseMergeTreeEngine WithPartitionBy([NotNull] string partitionBy)

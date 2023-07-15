@@ -66,7 +66,7 @@ public class Program
         }
         var t = builder.Services.BuildServiceProvider();
         var m = t.GetRequiredService<ClickHouseContext>();
-       // await m.Database.EnsureCreatedAsync();
+        // await m.Database.EnsureCreatedAsync();
         await m.Database.MigrateAsync();
         app.UseHttpsRedirection();
 
@@ -94,11 +94,13 @@ public class ClickHouseContext : DbContext
         var ord = modelBuilder.Entity<Order>();
         ord.Property(e => e.OrderId).ValueGeneratedNever();
         ord.HasAlternateKey(e => e.OrderId);
-        ord.HasMergeTreeEngine(a => new { a.OrderId, a.ShortId }, a =>
+        ord.HasReplacingMergeTreeEngine(a =>
         {
-            a.Settings = new();
             a.Settings.MinBytesForWidePart = default;
-        });
+        })
+            .HasOrderBy(a => new { a.OrderId, a.ShortId })
+            .HasPartitionBy(a => a.LastStatusUpdateDate)
+            ;
 
     }
 

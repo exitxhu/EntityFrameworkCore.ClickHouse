@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using static ClickHouse.EntityFrameworkCore.Storage.Engines.ClickHouseEngineTypeConstants;
 
 namespace ClickHouse.EntityFrameworkCore.Storage.Engines;
@@ -17,16 +16,6 @@ public abstract class ClickHouseEngine
     public static ClickHouseEngine Deserialize(string ser, string type)
     {
         return ser.DeserializeToProperType(GetEngineType(type));
-    }
-}
-public static class ClickHouseEngineDeserilizer
-{
-    public static ClickHouseEngine DeserializeToProperType(this string ser, Type engineType)
-    {
-        var res = JsonSerializer.Deserialize(ser, engineType);
-
-        return (ClickHouseEngine)res;
-
     }
 }
 public class ClickHouseEngineTypeConstants
