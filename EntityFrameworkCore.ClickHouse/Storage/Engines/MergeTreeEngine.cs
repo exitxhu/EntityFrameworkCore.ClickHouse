@@ -36,7 +36,7 @@ public class MergeTreeEngine : BaseMergeTreeEngine
 
         if (PartitionBy != null)
         {
-            builder.AppendLine($"$PARTITION BY ({PartitionBy})");
+            builder.AppendLine($"PARTITION BY ({PartitionBy})");
         }
 
         if (PrimaryKey != null)
@@ -53,20 +53,4 @@ public class MergeTreeEngine : BaseMergeTreeEngine
     }
 
 
-}
-public class PostgreSQLEngine : ClickHouseEngine
-{
-    public override string EngineType => ClickHouseEngineTypeConstants.PostgreSQLEngine;
-
-    public override string Serialize()
-    {
-        var res = JsonSerializer.Serialize(this);
-        return res;
-    }
-
-    public override void SpecifyEngine(MigrationCommandListBuilder builder, IModel model)
-    {
-        builder.Append($" ENGINE = PostgreSQL('host:port', 'database', 'table', 'user', 'password'[, `schema`])").AppendLine();
-
-    }
 }

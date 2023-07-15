@@ -2,6 +2,7 @@
 using System.Data.Common;
 using ClickHouse.EntityFrameworkCore.Infrastructure;
 using ClickHouse.EntityFrameworkCore.Infrastructure.Internal;
+using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -23,7 +24,8 @@ public static class ClickHouseDbContextOptionsBuilderExtensions
     public static DbContextOptionsBuilder UseClickHouse(
         this DbContextOptionsBuilder optionsBuilder,
         string connectionString,
-        Action<ClickHouseDbContextOptionsBuilder> clickHouseOptionsAction = null)
+        Action<ClickHouseDbContextOptionsBuilder> clickHouseOptionsAction = null,
+        Action<PostgreSQLEngineOptions> postgresOpBuilder = null)
     {
         var extension = (ClickHouseOptionsExtension)GetOrCreateExtension(optionsBuilder)
             .WithConnectionString(connectionString);
@@ -33,7 +35,11 @@ public static class ClickHouseDbContextOptionsBuilderExtensions
         ConfigureWarnings(optionsBuilder);
 
         clickHouseOptionsAction?.Invoke(new ClickHouseDbContextOptionsBuilder(optionsBuilder));
-
+        if(postgresOpBuilder != null)
+        {
+            PostgreSQLEngine.Options = new();
+            postgresOpBuilder(PostgreSQLEngine.Options);
+        }          
         return optionsBuilder;
     }
     

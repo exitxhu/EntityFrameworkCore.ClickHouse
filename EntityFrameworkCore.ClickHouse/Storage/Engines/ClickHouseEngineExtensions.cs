@@ -21,48 +21,48 @@ public static class ClickHouseEngineExtensions
 
             using (builder.Indent())
             {
-                if (settings.IndexGranularity.HasValue && settings.IndexGranularity != MergeTreeSettings.DefaultIndexGranularity)
+                if (settings.IndexGranularity != MergeTreeSettings.DefaultIndexGranularity)
                 {
                     builder.AppendLine("index_granularity = " + settings.IndexGranularity);
                 }
 
-                if (settings.IndexGranularityBytes.HasValue && settings.IndexGranularityBytes != MergeTreeSettings.DefaultIndexGranularityBytes)
+                if (settings.IndexGranularityBytes != MergeTreeSettings.DefaultIndexGranularityBytes)
                 {
                     builder.AppendLine("index_granularity_bytes = " + settings.IndexGranularityBytes);
                 }
 
-                if (settings.MinIndexGranularityBytes.HasValue && settings.MinIndexGranularityBytes != MergeTreeSettings.DefaultMinIndexGranularityBytes)
+                if (settings.MinIndexGranularityBytes != MergeTreeSettings.DefaultMinIndexGranularityBytes)
                 {
                     builder.AppendLine("min_index_granularity_bytes = " + settings.MinIndexGranularityBytes);
                 }
 
-                if (settings.EnableMixedGranularityParts.HasValue && settings.EnableMixedGranularityParts != MergeTreeSettings.DefaultEnableMixedGranularityParts)
+                if (settings.EnableMixedGranularityParts != MergeTreeSettings.DefaultEnableMixedGranularityParts)
                 {
                     builder.AppendLine("enable_mixed_granularity_parts = " + Convert.ToInt32(settings.EnableMixedGranularityParts));
                 }
 
-                if (settings.UseMinimalisticPartHeaderInZookeeper.HasValue && settings.UseMinimalisticPartHeaderInZookeeper != MergeTreeSettings.DefaultUseMinimalisticPartHeaderInZookeeper)
+                if (settings.UseMinimalisticPartHeaderInZookeeper != MergeTreeSettings.DefaultUseMinimalisticPartHeaderInZookeeper)
                 {
                     builder.AppendLine("use_minimalistic_part_header_in_zookeeper = " +
                                        Convert.ToInt32(settings.UseMinimalisticPartHeaderInZookeeper));
                 }
 
-                if (settings.MinMergeBytesToUseDirectIo.HasValue && settings.MinMergeBytesToUseDirectIo != MergeTreeSettings.DefaultMinMergeBytesToUseDirectIo)
+                if (settings.MinMergeBytesToUseDirectIo != MergeTreeSettings.DefaultMinMergeBytesToUseDirectIo)
                 {
                     builder.AppendLine("min_merge_bytes_to_use_direct_io = " + settings.MinMergeBytesToUseDirectIo);
                 }
 
-                if (settings.MergeWithTtlTimeout.HasValue && settings.MergeWithTtlTimeout != MergeTreeSettings.DefaultMergeWithTtlTimeout)
+                if ( settings.MergeWithTtlTimeout != MergeTreeSettings.DefaultMergeWithTtlTimeout)
                 {
-                    builder.AppendLine("merge_with_ttl_timeout = " + (int)settings.MergeWithTtlTimeout?.TotalSeconds);
+                    builder.AppendLine("merge_with_ttl_timeout = " + (int)settings.MergeWithTtlTimeout.TotalSeconds);
                 }
 
-                if (settings.WriteFinalMark.HasValue && settings.WriteFinalMark != MergeTreeSettings.DefaultWriteFinalMark)
+                if ( settings.WriteFinalMark != MergeTreeSettings.DefaultWriteFinalMark)
                 {
                     builder.AppendLine("write_final_mark = " + Convert.ToInt32(settings.WriteFinalMark));
                 }
 
-                if (settings.MergeMaxBlockSize.HasValue && settings.MergeMaxBlockSize != MergeTreeSettings.DefaultMergeMaxBlockSize)
+                if (settings.MergeMaxBlockSize != MergeTreeSettings.DefaultMergeMaxBlockSize)
                 {
                     builder.AppendLine("merge_max_block_size = " + settings.MergeMaxBlockSize);
                 }

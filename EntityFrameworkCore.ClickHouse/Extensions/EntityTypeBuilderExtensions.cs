@@ -60,9 +60,9 @@ public static class EntityTypeBuilderExtensions
             Engine = engine,
         };
     }
-    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasOrderBy<T>(
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasOrderBy<T, U>(
         [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
-        [NotNull] Expression<Func<T, object>> orderBy)
+        [NotNull] Expression<Func<T, U>> orderBy)
    where T : class
     {
         if (builder == null)
@@ -83,9 +83,9 @@ public static class EntityTypeBuilderExtensions
         builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
         return builder;
     }
-    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPartitionBy<T>(
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPartitionBy<T, U>(
         [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
-        [NotNull] Expression<Func<T, object>> PartitionBy)
+        [NotNull] Expression<Func<T, U>> PartitionBy)
    where T : class
     {
         if (builder == null)
@@ -106,9 +106,9 @@ public static class EntityTypeBuilderExtensions
         builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
         return builder;
     }
-    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPrimaryKey<T>(
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPrimaryKey<T, U>(
         [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
-        [NotNull] Expression<Func<T, object>> PrimaryKey)
+        [NotNull] Expression<Func<T, U>> PrimaryKey)
    where T : class
     {
         if (builder == null)
@@ -129,9 +129,9 @@ public static class EntityTypeBuilderExtensions
         builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
         return builder;
     }
-    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasSampleBy<T>(
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasSampleBy<T, U>(
         [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
-        [NotNull] Expression<Func<T, object>> SampleBy)
+        [NotNull] Expression<Func<T, U>> SampleBy)
    where T : class
     {
         if (builder == null)
@@ -162,6 +162,26 @@ public static class EntityTypeBuilderExtensions
 
         var engine = new StripeLogEngine();
         builder.Metadata.SetOrRemoveAnnotation(ClickHouseEngineTypeConstants.StripeLogEngine, engine);
+        return builder;
+    }
+
+    public static EntityTypeBuilder<T> HasPostGresEngine<T>(
+    [NotNull] this EntityTypeBuilder<T> builder,
+    [NotNull] string TableName,
+    string Schema = null)
+    where T : class
+    {
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+        var engine = new PostgreSQLEngine(
+        "Order",
+        "Order");
+
+        builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine.Serialize());
+
         return builder;
     }
 }

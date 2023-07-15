@@ -55,7 +55,13 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddDbContext<ClickHouseContext>(a => a.UseClickHouse($"Host=127.0.0.1;Protocol=http;Port=8443;Database=test;Username=affilio;Password=pcIslv0JbSjLGxV;"));
+        builder.Services.AddDbContext<ClickHouseContext>(a => a.UseClickHouse($"Host=127.0.0.1;Protocol=http;Port=8443;Database=test;Username=affilio;Password=pcIslv0JbSjLGxV;",postgresOpBuilder: a =>
+        {
+            a.Password = "netoqu6V";
+            a.Host = "172.16.150.2:5432";
+            a.UserName = "affilio";
+            a.DataBaseName = "affilio";
+        }));
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -94,12 +100,7 @@ public class ClickHouseContext : DbContext
         var ord = modelBuilder.Entity<Order>();
         ord.Property(e => e.OrderId).ValueGeneratedNever();
         ord.HasAlternateKey(e => e.OrderId);
-        ord.HasReplacingMergeTreeEngine(a =>
-        {
-            a.Settings.MinBytesForWidePart = default;
-        })
-            .HasOrderBy(a => new { a.OrderId, a.ShortId })
-            .HasPartitionBy(a => a.LastStatusUpdateDate)
+        ord.HasPostGresEngine("Order")
             ;
 
     }
@@ -117,22 +118,19 @@ public record Det
     public int? Null { get; set; }
     public bool MyBool { get; set; }
 }
-[Table("Order", Schema = "myd")]
+[Table("Order", Schema = "Order")]
 [ClickHouseTableCreationStrategy(TableCreationStrategy.CREATE_IF_NOT_EXISTS)]
 public record Order
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long OrderId { get; set; }
-    public int ShortId { get; set; }
-    public int MediaaaaId { get; set; }
+    public int MediaId { get; set; }
     public DateTime? LastStatusUpdateDate { get; set; }
 
     public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.WaitingForInvoice;
     public string MediaName { get; set; }
-    public string LinkName { get; set; }
     public int? RefererUserId { get; set; }
-    public long? Samad { get; set; }
 }
 public enum OrderPaymentStatus
 {

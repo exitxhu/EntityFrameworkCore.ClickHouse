@@ -34,7 +34,7 @@ public class ReplacingMergeTreeEngine : BaseMergeTreeEngine
 
         if (PartitionBy != null)
         {
-            builder.AppendLine($"$PARTITION BY ({PartitionBy})");
+            builder.AppendLine($"PARTITION BY ({PartitionBy})");
         }
 
         if (PrimaryKey != null)

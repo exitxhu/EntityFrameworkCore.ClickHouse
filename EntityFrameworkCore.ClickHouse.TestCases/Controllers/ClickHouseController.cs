@@ -26,13 +26,10 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
             await _clickHouseContext.Order.AddRangeAsync(new List<Order>{ new Order
             {
                 LastStatusUpdateDate = DateTime.Now,
-                LinkName = "asd",
-                MediaaaaId = 123,
                 MediaName = "asdasdf",
                 OrderId = 123,
                 PaymentStatus = OrderPaymentStatus.WaitingForInvoice,
                 RefererUserId = 1,
-                Samad = 1
             } });
             _clickHouseContext.SaveChanges();
             return Ok(_clickHouseContext.Order);
