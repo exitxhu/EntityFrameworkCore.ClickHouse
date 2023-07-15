@@ -23,7 +23,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        Debugger.Launch();
+        //   Debugger.Launch();
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
@@ -66,7 +66,7 @@ public class Program
         }
         var t = builder.Services.BuildServiceProvider();
         var m = t.GetRequiredService<ClickHouseContext>();
-        await m.Database.EnsureCreatedAsync();
+       // await m.Database.EnsureCreatedAsync();
         await m.Database.MigrateAsync();
         app.UseHttpsRedirection();
 
@@ -89,24 +89,17 @@ public class ClickHouseContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        Debugger.Launch();
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableCreationStrategyAttribute>()
-                ?? new ClickHouseTableCreationStrategyAttribute(TableCreationStrategy.CREATE);
-            entityType.SetOrRemoveAnnotation("ClickHouseTableCreationStrategy", t);
-            entityType.SetOrRemoveAnnotation("MMMMMMM", "aaaaaaaaa");
-        }
+        //  Debugger.Launch();
 
         var ord = modelBuilder.Entity<Order>();
-        ord.HasKey(e => e.OrderId).HasAnnotation("myann", "so do");
         ord.Property(e => e.OrderId).ValueGeneratedNever();
-        ord.HasMergeTreeEngine("OrderId,MediaId");
-        ord.Metadata.SetAnnotation("ASSSSS", "asd");
-        ord.Metadata.SetAnnotation("aaaaaaaaaa", new ClickHouseTableCreationStrategyAttribute(TableCreationStrategy.CREATE));
+        ord.HasAlternateKey(e => e.OrderId);
+        ord.HasMergeTreeEngine(a => new { a.OrderId, a.ShortId }, a =>
+        {
+            a.Settings = new();
+            a.Settings.MinBytesForWidePart = default;
+        });
 
-
-        modelBuilder.Model.AddAnnotation("asd", "Asdasd");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -1064,7 +1064,7 @@ public class ClickHouseCSharpHelper : ICSharpHelper
         }
         if (value is ClickHouseTableCreationStrategyAttribute b)
         {
-            return $@"""{(int)b.Strategy}""";
+            return $@"""{b.Strategy}""";
         }
         throw new InvalidOperationException(DesignStrings.UnknownLiteral(literalType));
     }

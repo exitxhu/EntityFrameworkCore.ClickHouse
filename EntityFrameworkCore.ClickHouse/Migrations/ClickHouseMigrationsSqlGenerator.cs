@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using System;
 using System.Linq;
 
 namespace ClickHouse.EntityFrameworkCore.Migrations;
@@ -24,7 +25,10 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
             .Append(" ")
             .Append(operation.IsNullable && !operation.ClrType.IsArray ? $" Nullable({columnType})" : columnType);
     }
+    protected override void Generate(EnsureSchemaOperation operation, IModel model, MigrationCommandListBuilder builder)
+    {
 
+    }
     protected override void Generate(MigrationOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
         if (operation is ClickHouseCreateDatabaseOperation cdo)
@@ -66,9 +70,25 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
 
     protected override void Generate(CreateTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
+
+
+        var models = model.GetEntityTypes();
+        var thisType = models.FirstOrDefault(a => a.GetTableName() == operation.Name);
+        var thisAnnotaions = thisType.GetAnnotations().ToList();
+        var createAnnotation = thisAnnotaions?.FirstOrDefault(a => a.Name == nameof(ClickHouseTableCreationStrategyAttribute))?.Value 
+            as ClickHouseTableCreationStrategyAttribute;
+        // Enum.TryParse<TableCreationStrategy>(createAnnotation, out var createAttr);
+        string statement = createAnnotation?.Strategy switch
+        {
+            TableCreationStrategy.CREATE_IF_NOT_EXISTS => "CREATE TABLE IF NOT EXISTS ",
+            TableCreationStrategy.CREATE_OR_REPLACE => "CREATE OR REPLACE TABLE ",
+            TableCreationStrategy.CREATE => "CREATE TABLE ",
+            _ => "CREATE TABLE IF NOT EXISTS ",
+        };
+
         builder
-            .Append("CREATE TABLE ")
-            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Name, operation.Schema))
+            .Append(statement)
+            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Name))
             .AppendLine(" (");
 
         using (builder.Indent())
@@ -80,14 +100,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
 
         builder.Append(")");
 
-        if (terminate)
-        {
-            builder.AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator);
-            EndStatement(builder);
-        }
-        var models = model.GetEntityTypes();
-        var ts = models.FirstOrDefault(a => a.GetTableName() == operation.Name);
-        var engineAnnotation = ts.GetAnnotations().FirstOrDefault(a => a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
+        var engineAnnotation = thisType.GetAnnotations()?.FirstOrDefault(a => a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
         var engine = engineAnnotation != null && engineAnnotation.Value != null
             ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(), engineAnnotation.Name)
             : new StripeLogEngine();

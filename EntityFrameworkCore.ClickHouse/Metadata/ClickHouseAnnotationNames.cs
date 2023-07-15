@@ -20,7 +20,7 @@ public sealed class ClickHouseTableCreationStrategyAttribute : Attribute
 
 public enum TableCreationStrategy
 {
-    CREATE,
+    CREATE = 1,
     CREATE_IF_NOT_EXISTS,
     CREATE_OR_REPLACE
 }
