@@ -177,8 +177,8 @@ public static class EntityTypeBuilderExtensions
         }
 
         var engine = new PostgreSQLEngine(
-        "Order",
-        "Order");
+        TableName,
+        Schema);
 
         builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine.Serialize());
 

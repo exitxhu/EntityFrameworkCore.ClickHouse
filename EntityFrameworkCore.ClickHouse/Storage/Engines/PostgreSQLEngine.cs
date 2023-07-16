@@ -28,7 +28,7 @@ public class PostgreSQLEngine : ClickHouseEngine
 
     public override void SpecifyEngine(MigrationCommandListBuilder builder, IModel model)
     {
-        builder.Append($" ENGINE = PostgreSQL('{Options.Host}', '{Options.DataBaseName}', '{Table}', '{Options.UserName}', '{Options.Password}'{(string.IsNullOrEmpty(Schema) ? "" : $", `{Schema}`")})").AppendLine();
+        builder.Append($" ENGINE = PostgreSQL('{Options.Host}', '{Options.DataBaseName}', '{Table}', '{Options.UserName}', '{Options.Password}'{(string.IsNullOrEmpty(Schema) ? "" : $", '{Schema}'")})").AppendLine();
 
     }
 }

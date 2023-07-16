@@ -17,13 +17,15 @@ using Microsoft.EntityFrameworkCore.Migrations.Design;
 using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using ClickHouse.EntityFrameworkCore.Metadata;
 using System.Reflection;
+using System.Collections.Specialized;
 
 namespace EntityFrameworkCore.ClickHouse.TestCases;
 public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        //   Debugger.Launch();
+        Debugger.Launch();
+
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
@@ -96,11 +98,18 @@ public class ClickHouseContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //  Debugger.Launch();
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            entityType.SetSchema(null);
+            var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableCreationStrategyAttribute>()
+                ?? new ClickHouseTableCreationStrategyAttribute(TableCreationStrategy.CREATE);
+            entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableCreationStrategyAttribute), t);
+        }
 
         var ord = modelBuilder.Entity<Order>();
         ord.Property(e => e.OrderId).ValueGeneratedNever();
         ord.HasAlternateKey(e => e.OrderId);
-        ord.HasPostGresEngine("Order")
+        ord.HasPostGresEngine("Order","Order")
             ;
 
     }
@@ -119,7 +128,7 @@ public record Det
     public bool MyBool { get; set; }
 }
 [Table("Order", Schema = "Order")]
-[ClickHouseTableCreationStrategy(TableCreationStrategy.CREATE_IF_NOT_EXISTS)]
+[ClickHouseTableCreationStrategy(TableCreationStrategy.CREATE_OR_REPLACE)]
 public record Order
 {
     [Key]
@@ -129,8 +138,6 @@ public record Order
     public DateTime? LastStatusUpdateDate { get; set; }
 
     public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.WaitingForInvoice;
-    public string MediaName { get; set; }
-    public int? RefererUserId { get; set; }
 }
 public enum OrderPaymentStatus
 {

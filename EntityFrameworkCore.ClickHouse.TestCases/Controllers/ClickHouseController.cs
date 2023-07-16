@@ -23,16 +23,10 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            await _clickHouseContext.Order.AddRangeAsync(new List<Order>{ new Order
-            {
-                LastStatusUpdateDate = DateTime.Now,
-                MediaName = "asdasdf",
-                OrderId = 123,
-                PaymentStatus = OrderPaymentStatus.WaitingForInvoice,
-                RefererUserId = 1,
-            } });
-            _clickHouseContext.SaveChanges();
-            return Ok(_clickHouseContext.Order);
+            var t = _clickHouseContext.Order.Where(a=>a.MediaId == 2191)
+                .OrderByDescending(a=>a.OrderId)
+                .Take(40).ToList();
+            return Ok(t);
         }
     }
 }
