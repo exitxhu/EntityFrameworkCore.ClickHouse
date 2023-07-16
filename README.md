@@ -1,9 +1,3 @@
-<p align="center" >
-    <img src="https://clickhouse.tech/images/logo.png">
-</p>
-
 # ClickHouse provider for Entity Framework Core
 
-[![GitHub Tag](https://img.shields.io/github/tag/denis-ivanov/EntityFrameworkCore.ClickHouse.svg?style=flat-square)](https://github.com/denis-ivanov/EntityFrameworkCore.ClickHouse/releases)
-[![NuGet Count](https://img.shields.io/nuget/dt/EntityFrameworkCore.ClickHouse.svg?style=flat-square)](https://www.nuget.org/packages/EntityFrameworkCore.ClickHouse/)
-[![Issues Open](https://img.shields.io/github/issues/denis-ivanov/EntityFrameworkCore.ClickHouse.svg?style=flat-square)](https://github.com/denis-ivanov/EntityFrameworkCore.ClickHouse/issues)
+* All schemas will set to null on model creating, if you want to use Schemas (which will consider as Database prefix in clickhouse) you need to set them manually after base.OnModelCreating()

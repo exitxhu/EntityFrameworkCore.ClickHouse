@@ -18,6 +18,7 @@ using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using ClickHouse.EntityFrameworkCore.Metadata;
 using System.Reflection;
 using System.Collections.Specialized;
+using ClickHouse.EntityFrameworkCore.Core;
 
 namespace EntityFrameworkCore.ClickHouse.TestCases;
 public class ClickHouseDesignTimeServices : IDesignTimeServices
@@ -57,7 +58,7 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddDbContext<ClickHouseContext>(a => a.UseClickHouse($"Host=127.0.0.1;Protocol=http;Port=8443;Database=test;Username=affilio;Password=pcIslv0JbSjLGxV;",postgresOpBuilder: a =>
+        builder.Services.AddDbContext<ClickHouseContext>(a => a.UseClickHouse($"Host=127.0.0.1;Protocol=http;Port=8443;Database=test;Username=affilio;Password=pcIslv0JbSjLGxV;", postgresOpBuilder: a =>
         {
             a.Password = "netoqu6V";
             a.Host = "172.16.150.2:5432";
@@ -87,7 +88,7 @@ public class Program
     }
 }
 
-public class ClickHouseContext : DbContext
+public class ClickHouseContext : ClickHouseDbContext
 {
     public DbSet<Order> Order { get; set; }
     public DbSet<Det> Dets { get; set; }
@@ -97,19 +98,12 @@ public class ClickHouseContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //  Debugger.Launch();
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            entityType.SetSchema(null);
-            var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableCreationStrategyAttribute>()
-                ?? new ClickHouseTableCreationStrategyAttribute(TableCreationStrategy.CREATE);
-            entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableCreationStrategyAttribute), t);
-        }
+        base.OnModelCreating(modelBuilder);
 
         var ord = modelBuilder.Entity<Order>();
         ord.Property(e => e.OrderId).ValueGeneratedNever();
         ord.HasAlternateKey(e => e.OrderId);
-        ord.HasPostGresEngine("Order","Order")
+        ord.HasPostGresEngine("Order", "Order")
             ;
 
     }
