@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.ClickHouse", "EntityFrameworkCore.ClickHouse\EntityFrameworkCore.ClickHouse.csproj", "{F5828F6F-C13E-4541-BF0D-353962CA755B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EFCore.ClickHouse", "EntityFrameworkCore.ClickHouse\EFCore.ClickHouse.csproj", "{F5828F6F-C13E-4541-BF0D-353962CA755B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkCore.ClickHouse.IntegrationTests", "EntityFrameworkCore.ClickHouse.IntegrationTests\EntityFrameworkCore.ClickHouse.IntegrationTests.csproj", "{58D06D63-5496-4B2F-93F4-F471D40830EF}"
 EndProject

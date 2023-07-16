@@ -4,12 +4,12 @@
     <RootNamespace>ClickHouse.EntityFrameworkCore</RootNamespace>
     <TargetFramework>net7.0</TargetFramework>
     <LangVersion>11</LangVersion>
-    <PackageVersion>0.0.9</PackageVersion>
-    <Authors>Denis Ivanov</Authors>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Hadi Bazmi, Forked From Denis Ivanov Repo</Authors>
     <Description>ClickHouse provider for Entity Framework Core.</Description>
     <PackageTags>ClickHouse; Entity Framework Core</PackageTags>
     <PackageIcon>Logo.png</PackageIcon>
-    <RepositoryUrl>https://github.com/denis-ivanov/EntityFrameworkCore.ClickHouse</RepositoryUrl>
+    <RepositoryUrl>https://github.com/exitxhu/EntityFrameworkCore.ClickHouse</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 

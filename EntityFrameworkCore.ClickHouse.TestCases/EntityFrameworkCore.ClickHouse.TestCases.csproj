@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntityFrameworkCore.ClickHouse\EntityFrameworkCore.ClickHouse.csproj" />
+    <ProjectReference Include="..\EntityFrameworkCore.ClickHouse\EFCore.ClickHouse.csproj" />
   </ItemGroup>
 
 </Project>
