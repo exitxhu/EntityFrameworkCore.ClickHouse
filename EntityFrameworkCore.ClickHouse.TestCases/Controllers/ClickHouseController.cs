@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
 namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
 {
     [ApiController]
@@ -23,8 +23,10 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var t = _clickHouseContext.Order.Where(a=>a.MediaId == 2191)
-                .OrderByDescending(a=>a.OrderId)
+            var t = _clickHouseContext.Order
+                .Include(a => a.Link)
+                .Where(a => a.MediaId == 2191)
+                .OrderByDescending(a => a.OrderId)
                 .Take(40).ToList();
             return Ok(t);
         }

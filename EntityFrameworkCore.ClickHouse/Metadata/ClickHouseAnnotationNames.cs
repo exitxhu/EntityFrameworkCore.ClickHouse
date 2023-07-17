@@ -8,16 +8,23 @@ public static class ClickHouseAnnotationNames
     public const string Engine = Prefix + "Engine";
 }
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public sealed class ClickHouseTableCreationStrategyAttribute : Attribute
+public sealed class ClickHouseTableAttribute : Attribute
 {
-    public ClickHouseTableCreationStrategyAttribute(TableCreationStrategy strategy)
+    public ClickHouseTableAttribute(TableCreationStrategy strategy, ImplicitNavigationStrategy navStrategy = ImplicitNavigationStrategy.IGNORE)
     {
         Strategy = strategy;
+        NavStrategy = navStrategy;
     }
 
     public TableCreationStrategy Strategy { get; }
+    public ImplicitNavigationStrategy NavStrategy { get; set; }
 }
 
+public enum ImplicitNavigationStrategy
+{
+    IGNORE = 1,
+    CREATE_AS_DEFAULT_ENGINE
+}
 public enum TableCreationStrategy
 {
     CREATE = 1,

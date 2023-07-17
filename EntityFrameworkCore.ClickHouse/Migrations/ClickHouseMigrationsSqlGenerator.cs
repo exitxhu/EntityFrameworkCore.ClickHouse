@@ -72,6 +72,33 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     {
         CreateTableCheckConstraints(operation, model, builder);
     }
+    protected override void Generate(RenameColumnOperation operation, IModel model, MigrationCommandListBuilder builder)
+    {
+        var models = model.GetEntityTypes();
+        var thisType = models.FirstOrDefault(a => a.GetTableName() == operation.Table);
+        var thisAnnotaions = thisType.GetAnnotations().ToList();
+        TableCreationStrategy createAnnotation = GetCreateStrategy(thisAnnotaions);
+        var engineAnnotation = thisType.GetAnnotations()?.FirstOrDefault(a => a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
+        var engine = engineAnnotation != null && engineAnnotation.Value != null
+            ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(), engineAnnotation.Name)
+            : new StripeLogEngine();
+
+        if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation != TableCreationStrategy.CREATE_OR_REPLACE
+            )
+        {
+            throw new InvalidOperationException($"Click house dont support Add/Drop column in table engin type of {engine.EngineType}, please specify create strategy of {TableCreationStrategy.CREATE_OR_REPLACE} on table, to recreate the tablek");
+        }
+        else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
+        {
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model, operation.Schema);
+            Generate(createTableOperation, model, builder);
+            return;
+        }
+        else
+            base.Generate(operation, model, builder);
+    }
     protected override void Generate(DropColumnOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
         //PostgresTable needs to be recreated
@@ -91,38 +118,48 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         {
             throw new InvalidOperationException($"Click house dont support Add/Drop column in table engin type of {engine.EngineType}, please specify create strategy of {TableCreationStrategy.CREATE_OR_REPLACE} on table, to recreate the tablek");
         }
-        else if (createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
+        else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine && 
+            createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
         {
-            var t = model.GetRelationalModel().Tables.FirstOrDefault(t => t.Name == operation.Table);
-            var createTableOperation = new CreateTableOperation
-            {
-                Schema = operation.Schema,
-                Name = operation.Table,
-            };
-            createTableOperation.AddAnnotations(t.GetAnnotations());
-
-            createTableOperation.Columns.AddRange(
-                GetSortedColumns(t).SelectMany(p => Add(p, inline: true)).Cast<AddColumnOperation>());
-
-            var primaryKey = t.PrimaryKey;
-            if (primaryKey != null)
-            {
-                createTableOperation.PrimaryKey = Add(primaryKey).Cast<AddPrimaryKeyOperation>().Single();
-            }
-
-            createTableOperation.UniqueConstraints.AddRange(
-                t.UniqueConstraints.Where(c => !c.GetIsPrimaryKey()).SelectMany(c => Add(c))
-                    .Cast<AddUniqueConstraintOperation>());
-            createTableOperation.CheckConstraints.AddRange(
-                t.CheckConstraints.SelectMany(c => Add(c))
-                    .Cast<AddCheckConstraintOperation>());
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model, operation.Schema);
             Generate(createTableOperation, model, builder);
         }
+        else
+            base.Generate(operation, model, builder);
 
     }
+
+    private CreateTableOperation GetTableCreateModel(string name, IModel model, string schema = null)
+    {
+        var t = model.GetRelationalModel().Tables.FirstOrDefault(t => t.Name == name);
+        var createTableOperation = new CreateTableOperation
+        {
+            Schema = schema,
+            Name = name,
+        };
+        createTableOperation.AddAnnotations(t.GetAnnotations());
+
+        createTableOperation.Columns.AddRange(
+            GetSortedColumns(t).SelectMany(p => Add(p, inline: true)).Cast<AddColumnOperation>());
+
+        var primaryKey = t.PrimaryKey;
+        if (primaryKey != null)
+        {
+            createTableOperation.PrimaryKey = Add(primaryKey).Cast<AddPrimaryKeyOperation>().Single();
+        }
+
+        createTableOperation.UniqueConstraints.AddRange(
+            t.UniqueConstraints.Where(c => !c.GetIsPrimaryKey()).SelectMany(c => Add(c))
+                .Cast<AddUniqueConstraintOperation>());
+        createTableOperation.CheckConstraints.AddRange(
+            t.CheckConstraints.SelectMany(c => Add(c))
+                .Cast<AddCheckConstraintOperation>());
+        return createTableOperation;
+    }
+
     static TableCreationStrategy GetCreateStrategy(List<Infrastructure.IAnnotation> thisAnnotaions)
     {
-        Enum.TryParse<TableCreationStrategy>(thisAnnotaions?.FirstOrDefault(a => a.Name == nameof(ClickHouseTableCreationStrategyAttribute))?.Value.ToString(), out var createAnnotation);
+        Enum.TryParse<TableCreationStrategy>(thisAnnotaions?.FirstOrDefault(a => a.Name == nameof(ClickHouseTableAttribute))?.Value.ToString(), out var createAnnotation);
         return createAnnotation;
     }
     protected override void Generate(AlterTableOperation operation, IModel model, MigrationCommandListBuilder builder)
@@ -171,10 +208,6 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         engine.SpecifyEngine(builder, model);
         builder.AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator);
         EndStatement(builder);
-    }
-    protected override void Generate(RenameColumnOperation operation, IModel model, MigrationCommandListBuilder builder)
-    {
-        base.Generate(operation, model, builder);
     }
 
 

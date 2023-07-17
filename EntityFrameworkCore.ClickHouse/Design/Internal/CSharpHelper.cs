@@ -1062,7 +1062,7 @@ public class ClickHouseCSharpHelper : ICSharpHelper
             var t = @$"""{a.Serialize().Replace(@"""", "\\\"")} """;
             return t;
         }
-        if (value is ClickHouseTableCreationStrategyAttribute b)
+        if (value is ClickHouseTableAttribute b)
         {
             return $@"""{b.Strategy}""";
         }
