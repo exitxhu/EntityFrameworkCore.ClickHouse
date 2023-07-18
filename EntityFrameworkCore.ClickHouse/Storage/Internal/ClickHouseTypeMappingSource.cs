@@ -35,7 +35,7 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
     }
     public override RelationalTypeMapping? FindMapping(Type type)
     {
-            return base.FindMapping(type);
+        return base.FindMapping(type);
     }
 
     protected override RelationalTypeMapping FindMapping(in RelationalTypeMappingInfo mappingInfo) =>
@@ -56,14 +56,16 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
 
     private RelationalTypeMapping FindArrayMapping(in RelationalTypeMappingInfo mappingInfo)
     {
+        //Debugger.Launch();
         if (mappingInfo.ClrType == null || !mappingInfo.ClrType.IsArray)
         {
             return null;
         }
 
         var elementType = mappingInfo.ClrType.GetElementType();
-        var elementTypeMapping = ClrTypeMappings[elementType];
-        return new ClickHouseArrayTypeMapping($"Array({elementTypeMapping.StoreType})", elementTypeMapping);
+        if (ClrTypeMappings.TryGetValue(elementType, out var elementTypeMapping))
+            return new ClickHouseArrayTypeMapping($"Array({elementTypeMapping.StoreType})", elementTypeMapping);
+        return null;
     }
 
     private RelationalTypeMapping GetDecimalMapping(in RelationalTypeMappingInfo mappingInfo)

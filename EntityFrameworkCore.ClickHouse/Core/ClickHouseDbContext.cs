@@ -21,22 +21,17 @@ public class ClickHouseDbContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        Debugger.Launch();
+        //Debugger.Launch();
         var entityTypes = modelBuilder.Model.GetEntityTypes();
+       
+
         foreach (var entityType in entityTypes)
         {
             entityType.SetSchema(null);
             var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
                 ?? new ClickHouseTableAttribute(TableCreationStrategy.CREATE);
             entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
-            var ttt = entityType.GetNavigations().ToList();
-            foreach (var nav in ttt)
-            {
-                var a = entityTypes.FirstOrDefault(a => a.Name == nav.Name);
-                if (nav.IsOnDependent && a is null)
-                    entityType.AddIgnored(nav.Name);
 
-            }
         }
     }
 }

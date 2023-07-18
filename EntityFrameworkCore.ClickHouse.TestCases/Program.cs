@@ -52,6 +52,7 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        //Debugger.Launch();
 
         // Add services to the container.
         builder.Services.AddControllers();
@@ -93,22 +94,34 @@ public class Program
 public class ClickHouseContext : ClickHouseDbContext
 {
     public DbSet<Order> Order { get; set; }
-    public DbSet<Link> Links{ get; set; }
+    public DbSet<Link> Links { get; set; }
+    //public DbSet<Media> Medias{ get; set; }
     public ClickHouseContext(DbContextOptions op) : base(op)
     {
 
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        //Debugger.Launch();
         base.OnModelCreating(modelBuilder);
-
         var ord = modelBuilder.Entity<Order>();
         ord.HasPostGresEngine("Order", "Order")
             ;
         var link = modelBuilder.Entity<Link>();
         link.HasPostGresEngine("Link", "Link");
 
+        var media = modelBuilder.Entity<Media>();
+        link.HasPostGresEngine("Media", "Media");
 
+        var es = modelBuilder.Entity<WebStore>();
+        es.HasPostGresEngine("WebStore", "WebStore");
+
+        //es.Property(a => a.RecheckHeaders)
+        //     .HasConversion(a => a.ToString(), a => new KeyValueVO(a));
+
+        es.Property(a => a.RecheckHeaders)
+            .HasConversion(a => a.Select(n => n.ToString()).ToArray(), a => a.Select(n => new KeyValueVO(n))
+            .ToArray());
 
     }
 
@@ -140,61 +153,41 @@ public record Order
     public long OrderId { get; set; }
 
     public int? LinkId { get; set; }
-    public Link Link{ get; set; }
+    public Link Link { get; set; }
+    [ClickHouseIgnore]
     public Media Media { get; set; }
     public int? MediaId { get; set; }
-
-    public DateTime? LastStatusUpdateDate { get; set; }
-
-    [JsonIgnore]
-    public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.WaitingForInvoice;
-    [NotMapped]
-    public string MediaName { get; set; }
-    [NotMapped]
-    public string LinkName { get; set; }
-    public int? RefererUserId { get; set; }
-
-
-    [StringLength(128)]
-    public string OriginalOrderId { get; set; }
-    [StringLength(32)]
-    public string BasketId { get; set; }
-    [ForeignKey("WebStoreId")]
     public int? WebStoreId { get; set; }
-    [ForeignKey("LinkWebStoreId")]
-    public int? LinkWebStoreId { get; set; }
-    [ForeignKey("LinkId")]
-    public DateTime? FinalizeDate { get; set; }
-    [ForeignKey("ClickHistoryId")]
-    public long? ClickHistoryId { get; set; }
-    [MaxLength(50)]
-    public string AffiliateId { get; set; }
-    [StringLength(128)]
-    public string OriginalUserId { get; set; }
-    public bool IsNewCustomer { get; set; }
-    public Price Amount { get; set; }
-    public Price ShippingCost { get; set; }
-    public Price VoucherPrice { get; set; }
-    public Price VoucherUsedAmount { get; set; }
-    [StringLength(128)]
-    public string Source { get; set; }
-    [StringLength(128)]
-    public string CloseSource { get; set; }
-    public DateTime OrderDate { get; set; }
-    [StringLength(128)]
-    public string State { get; set; }
-    [StringLength(128)]
-    public string City { get; set; }
-    public DateTime? DeliveryDate { get; set; }
-    public DateTime? WebStoreLastUpdate { get; set; }
-    public int Index { get; set; }
-    public bool IsItemsEdited { get; set; } = false;
-    public Price VatPrice { get; set; }
+    public WebStore WebStore { get; set; }
 }
 public enum OrderPaymentStatus
 {
     WaitingForInvoice,
     WaitingForPayment,
+}
+[ClickHouseTable(TableCreationStrategy.CREATE_OR_REPLACE)]
+public class WebStore
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int WebStoreId { get; set; }
+
+    public string AlternativeUrl { get; set; }
+
+    public KeyValueVO[] RecheckHeaders { get; set; }
+    public DateTime CreateDate { get; set; }
+    public DateTime RecheckFromDate { get; set; }
+    public string About { get; set; }
+    public string TradeName { get; set; }
+
+    public int? DependingWebStoreId { get; set; }
+    [JsonIgnore]
+    public WebStore DependingWebStore { get; set; }
+    [NotMapped]
+    public string DependingWebStoreName { get; set; }
+
+
+
 }
 [Owned]
 public class Price : AbstractValueObject
@@ -259,4 +252,39 @@ public abstract class AbstractValueObject
     }
     public static bool operator ==(AbstractValueObject left, AbstractValueObject right) => EqualOperator(left, right);
     public static bool operator !=(AbstractValueObject left, AbstractValueObject right) => !EqualOperator(left, right);
+}
+public class KeyValueVO : AbstractValueObject
+{
+    public KeyValueVO()
+    {
+
+    }
+    public KeyValueVO(string str)
+    {
+        var segs = str.Split(":");
+        if (segs.Length != 2)
+            throw new Exception("KeyValueVO needs an input like \"key:value\" which is not provided correctly");
+        Key = segs[0];
+        Value = segs[1];
+    }
+    public KeyValueVO(string key, string value)
+    {
+        Key = key;
+        Value = value;
+    }
+    public string Key { get; }
+    public string Value { get; }
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Key;
+        yield return Value;
+    }
+    public static implicit operator string(KeyValueVO vo)
+    {
+        return $"{vo.Key}:{vo.Value}";
+    }
+    public override string ToString()
+    {
+        return this;
+    }
 }

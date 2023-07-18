@@ -24,7 +24,7 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
         public async Task<IActionResult> Get()
         {
             var t = _clickHouseContext.Order
-                .Include(a => a.Link)
+                .Include(a => a.WebStore)
                 .Where(a => a.MediaId == 2191)
                 .OrderByDescending(a => a.OrderId)
                 .Take(40).ToList();

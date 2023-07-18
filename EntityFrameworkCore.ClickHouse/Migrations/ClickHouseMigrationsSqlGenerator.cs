@@ -72,6 +72,33 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     {
         CreateTableCheckConstraints(operation, model, builder);
     }
+    protected override void Generate(AddColumnOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+        var models = model.GetEntityTypes();
+        var thisType = models.FirstOrDefault(a => a.GetTableName() == operation.Table);
+        var thisAnnotaions = thisType.GetAnnotations().ToList();
+        TableCreationStrategy createAnnotation = GetCreateStrategy(thisAnnotaions);
+        var engineAnnotation = thisType.GetAnnotations()?.FirstOrDefault(a => a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
+        var engine = engineAnnotation != null && engineAnnotation.Value != null
+            ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(), engineAnnotation.Name)
+            : new StripeLogEngine();
+
+        if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation != TableCreationStrategy.CREATE_OR_REPLACE
+            )
+        {
+            throw new InvalidOperationException($"Click house dont support Add/Drop column in table engin type of {engine.EngineType}, please specify create strategy of {TableCreationStrategy.CREATE_OR_REPLACE} on table, to recreate the tablek");
+        }
+        else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
+        {
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model, operation.Schema);
+            Generate(createTableOperation, model, builder);
+            return;
+        }
+        else
+            base.Generate(operation, model, builder, terminate);
+    }
     protected override void Generate(RenameColumnOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
         var models = model.GetEntityTypes();
@@ -118,7 +145,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         {
             throw new InvalidOperationException($"Click house dont support Add/Drop column in table engin type of {engine.EngineType}, please specify create strategy of {TableCreationStrategy.CREATE_OR_REPLACE} on table, to recreate the tablek");
         }
-        else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine && 
+        else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
             createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
         {
             CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model, operation.Schema);

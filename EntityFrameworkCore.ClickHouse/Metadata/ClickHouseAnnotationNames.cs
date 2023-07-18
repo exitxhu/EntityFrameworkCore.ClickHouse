@@ -19,7 +19,11 @@ public sealed class ClickHouseTableAttribute : Attribute
     public TableCreationStrategy Strategy { get; }
     public ImplicitNavigationStrategy NavStrategy { get; set; }
 }
+[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+public sealed class ClickHouseIgnore: Attribute
+{
 
+}
 public enum ImplicitNavigationStrategy
 {
     IGNORE = 1,
