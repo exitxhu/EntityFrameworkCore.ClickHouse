@@ -4,7 +4,7 @@
     <RootNamespace>ClickHouse.EntityFrameworkCore</RootNamespace>
     <TargetFramework>net7.0</TargetFramework>
     <LangVersion>11</LangVersion>
-    <PackageVersion>1.0.1</PackageVersion>
+    <PackageVersion>1.0.2</PackageVersion>
     <Authors>Hadi Bazmi, Forked From Denis Ivanov Repo</Authors>
     <Description>ClickHouse provider for Entity Framework Core.</Description>
     <PackageTags>ClickHouse; Entity Framework Core</PackageTags>

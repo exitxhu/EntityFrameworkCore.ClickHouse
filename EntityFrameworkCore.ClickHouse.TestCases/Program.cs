@@ -53,7 +53,7 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        //Debugger.Launch();
+        Debugger.Launch();
 
         // Add services to the container.
         builder.Services.AddControllers();
@@ -94,8 +94,8 @@ public class Program
 
 public class ClickHouseContext : ClickHouseDbContext
 {
-    public DbSet<Order> Order { get; set; }
-    public DbSet<Link> Links { get; set; }
+    //public DbSet<Order> Order { get; set; }
+    //public DbSet<Link> Links { get; set; }
     public DbSet<User> User { get; set; }
     //public DbSet<Media> Medias{ get; set; }
     public ClickHouseContext(DbContextOptions op) : base(op)
@@ -106,27 +106,27 @@ public class ClickHouseContext : ClickHouseDbContext
     {
         //Debugger.Launch();
         base.OnModelCreating(modelBuilder);
-        var ord = modelBuilder.Entity<Order>();
-        ord.HasPostGresEngine("Order", "Order")
-            ;
-        var link = modelBuilder.Entity<Link>();
-        link.HasPostGresEngine("Link", "Link");
+        //var ord = modelBuilder.Entity<Order>();
+        //ord.HasPostGresEngine("Order", "Order")
+        //    ;
+        //var link = modelBuilder.Entity<Link>();
+        //link.HasPostGresEngine("Link", "Link");
 
-        var media = modelBuilder.Entity<Media>();
-        link.HasPostGresEngine("Media", "Media");
+        //var media = modelBuilder.Entity<Media>();
+        //link.HasPostGresEngine("Media", "Media");
 
-        var es = modelBuilder.Entity<WebStore>();
-        es.HasPostGresEngine("WebStore", "WebStore");
-
-        var user = modelBuilder.Entity<WebStore>();
-        es.HasPostGresEngine("User", "Accounting");
+        //var es = modelBuilder.Entity<WebStore>();
+        //es.HasPostGresEngine("WebStore", "WebStore");
 
         //es.Property(a => a.RecheckHeaders)
         //     .HasConversion(a => a.ToString(), a => new KeyValueVO(a));
 
-        es.Property(a => a.RecheckHeaders)
-            .HasConversion(a => a.Select(n => n.ToString()).ToArray(), a => a.Select(n => new KeyValueVO(n))
-            .ToArray());
+        //es.Property(a => a.RecheckHeaders)
+        //    .HasConversion(a => a.Select(n => n.ToString()).ToArray(), a => a.Select(n => new KeyValueVO(n))
+        //    .ToArray());
+
+        var user = modelBuilder.Entity<User>();
+        user.HasPostGresEngine("User", "Accounting");
 
     }
 
@@ -179,7 +179,7 @@ public class WebStore
 
     public string AlternativeUrl { get; set; }
 
-    public KeyValueVO[] RecheckHeaders { get; set; }
+    public List<KeyValueVO> RecheckHeaders { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime RecheckFromDate { get; set; }
     public string About { get; set; }
@@ -206,7 +206,7 @@ public class User
     [JsonIgnore]
     public string PasswordHash { get; set; }
     public bool Agreement { get; set; }
-    //public List<KycStatusEnum> KycStatus { get; set; }
+    public List<KycStatusEnum> KycStatus { get; set; }
     public KycStatusEnum Status  { get; set; }
 }
     [Owned]

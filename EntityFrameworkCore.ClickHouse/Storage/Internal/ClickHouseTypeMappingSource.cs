@@ -2,6 +2,8 @@
 using ClickHouse.EntityFrameworkCore.Storage.Internal.Mapping;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
+using System.CodeDom;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -57,21 +59,30 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
     private RelationalTypeMapping FindArrayMapping(in RelationalTypeMappingInfo mappingInfo)
     {
         //Debugger.Launch();
-        if (mappingInfo.ClrType == null)
+        var isEnumerable= typeof(IEnumerable).IsAssignableFrom(mappingInfo.ClrType);
+        if ((mappingInfo.ClrType == null || !mappingInfo.ClrType.IsArray) && !isEnumerable)
             return null;
-        if(mappingInfo.ClrType.IsEnum)
-        {
-            var enumType = mappingInfo.ClrType.GetEnumUnderlyingType();
-            if (ClrTypeMappings.TryGetValue(enumType, out var enumTypeMapping))
-                return new ClickHouseArrayTypeMapping($"Array({enumTypeMapping.StoreType})", enumTypeMapping);
-        }
 
-        if (!mappingInfo.ClrType.IsArray)
+        if(isEnumerable)
         {
-            return null;
+            var enumerableType = mappingInfo.ClrType.GenericTypeArguments[0];
+            if (enumerableType.IsEnum)
+            {
+                var enumType = enumerableType.GetEnumUnderlyingType();
+                if (ClrTypeMappings.TryGetValue(enumType, out var enumTypeMapping))
+                    return new ClickHouseArrayTypeMapping($"Array({enumTypeMapping.StoreType})", enumTypeMapping);
+            }
+            if (ClrTypeMappings.TryGetValue(enumerableType, out var enumerableTypeMapping))
+                return new ClickHouseArrayTypeMapping($"Array({enumerableTypeMapping.StoreType})", enumerableTypeMapping);
         }
 
         var elementType = mappingInfo.ClrType.GetElementType();
+        if (elementType.IsEnum)
+        {
+            var enumType = elementType.GetEnumUnderlyingType();
+            if (ClrTypeMappings.TryGetValue(enumType, out var enumTypeMapping))
+                return new ClickHouseArrayTypeMapping($"Array({enumTypeMapping.StoreType})", enumTypeMapping);
+        }
         if (ClrTypeMappings.TryGetValue(elementType, out var elementTypeMapping))
             return new ClickHouseArrayTypeMapping($"Array({elementTypeMapping.StoreType})", elementTypeMapping);
         return null;
