@@ -205,6 +205,7 @@ public class User
     //[JsonIgnore]
     [JsonIgnore]
     public string PasswordHash { get; set; }
+    public int[] MyProperty { get; set; }
     public bool Agreement { get; set; }
     public List<KycStatusEnum> KycStatus { get; set; }
     public KycStatusEnum Status  { get; set; }

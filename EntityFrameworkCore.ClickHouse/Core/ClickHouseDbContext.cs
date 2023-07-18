@@ -21,7 +21,7 @@ public class ClickHouseDbContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //Debugger.Launch();
+       // Debugger.Launch();
         var entityTypes = modelBuilder.Model.GetEntityTypes();
        
 

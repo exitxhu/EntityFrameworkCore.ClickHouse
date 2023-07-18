@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ClickHouse.EntityFrameworkCore.Storage.Internal;
 
@@ -25,7 +26,8 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
         { typeof(short), new ShortTypeMapping("Int16") },
         { typeof(uint), new UIntTypeMapping("UInt32") },
         { typeof(ushort), new UShortTypeMapping("UInt16") },
-        { typeof(DateTime), new DateTimeTypeMapping("DateTime") },
+        { typeof(DateTime), new DateOnlyTypeMapping("DateTime") },
+        { typeof(DateOnly), new FloatTypeMapping("Date") },
         { typeof(double), new DoubleTypeMapping("Float64") },
         { typeof(float), new FloatTypeMapping("Float32") },
         { typeof(Guid), new GuidTypeMapping("UUID") }
@@ -60,12 +62,15 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
     {
         //Debugger.Launch();
         var isEnumerable= typeof(IEnumerable).IsAssignableFrom(mappingInfo.ClrType);
+
         if ((mappingInfo.ClrType == null || !mappingInfo.ClrType.IsArray) && !isEnumerable)
             return null;
 
-        if(isEnumerable)
+        if(isEnumerable && !mappingInfo.ClrType.IsArray)
         {
-            var enumerableType = mappingInfo.ClrType.GenericTypeArguments[0];
+            var enumerableType = mappingInfo.ClrType?.GenericTypeArguments?.FirstOrDefault();
+            if (enumerableType is null) 
+                return null;
             if (enumerableType.IsEnum)
             {
                 var enumType = enumerableType.GetEnumUnderlyingType();
@@ -77,6 +82,8 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
         }
 
         var elementType = mappingInfo.ClrType.GetElementType();
+        if (elementType is null) 
+            return null;
         if (elementType.IsEnum)
         {
             var enumType = elementType.GetEnumUnderlyingType();
