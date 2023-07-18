@@ -1,4 +1,4 @@
-
+﻿
 using ClickHouse.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Collections.Specialized;
 using ClickHouse.EntityFrameworkCore.Core;
 using Humanizer;
+using System.ComponentModel;
 
 namespace EntityFrameworkCore.ClickHouse.TestCases;
 public class ClickHouseDesignTimeServices : IDesignTimeServices
@@ -95,6 +96,7 @@ public class ClickHouseContext : ClickHouseDbContext
 {
     public DbSet<Order> Order { get; set; }
     public DbSet<Link> Links { get; set; }
+    public DbSet<User> User { get; set; }
     //public DbSet<Media> Medias{ get; set; }
     public ClickHouseContext(DbContextOptions op) : base(op)
     {
@@ -115,6 +117,9 @@ public class ClickHouseContext : ClickHouseDbContext
 
         var es = modelBuilder.Entity<WebStore>();
         es.HasPostGresEngine("WebStore", "WebStore");
+
+        var user = modelBuilder.Entity<WebStore>();
+        es.HasPostGresEngine("User", "Accounting");
 
         //es.Property(a => a.RecheckHeaders)
         //     .HasConversion(a => a.ToString(), a => new KeyValueVO(a));
@@ -189,7 +194,22 @@ public class WebStore
 
 
 }
-[Owned]
+public class User 
+
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int UserId { get; set; }
+    [StringLength(50)]
+    public string Mobile { get; set; } //username
+    //[JsonIgnore]
+    [JsonIgnore]
+    public string PasswordHash { get; set; }
+    public bool Agreement { get; set; }
+    //public List<KycStatusEnum> KycStatus { get; set; }
+    public KycStatusEnum Status  { get; set; }
+}
+    [Owned]
 public class Price : AbstractValueObject
 {
     public long Amount { get; set; }
@@ -287,4 +307,24 @@ public class KeyValueVO : AbstractValueObject
     {
         return this;
     }
+
+}
+public enum KycStatusEnum
+{
+    [Description("اطلاعات شخصی")]
+    PersonalInfoConfirmed = 1,
+    [Description("اطلاعات شرکت")]
+    CompanyInfoConfirmed = 2,
+    [Description("اطلاعات بانکی")]
+    BankAccountInfoConfirmed = 3,
+    [Description("اطلاعات تماس")]
+    ContactInfoConfirmed = 4,
+    [Description("کارت ملی")]
+    NationalCardConfirmed = 5,
+    [Description("شناسنامه")]
+    IdentityCardConfirmed = 6,
+    [Description("ارزش افزوده")]
+    VatDocumentConfirmed = 7,
+    [Description("روزنامه رسمی")]
+    NewsPaperDocumentConfirmed = 8
 }

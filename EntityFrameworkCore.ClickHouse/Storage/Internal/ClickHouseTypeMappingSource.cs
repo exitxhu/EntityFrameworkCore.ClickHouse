@@ -57,7 +57,16 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
     private RelationalTypeMapping FindArrayMapping(in RelationalTypeMappingInfo mappingInfo)
     {
         //Debugger.Launch();
-        if (mappingInfo.ClrType == null || !mappingInfo.ClrType.IsArray)
+        if (mappingInfo.ClrType == null)
+            return null;
+        if(mappingInfo.ClrType.IsEnum)
+        {
+            var enumType = mappingInfo.ClrType.GetEnumUnderlyingType();
+            if (ClrTypeMappings.TryGetValue(enumType, out var enumTypeMapping))
+                return new ClickHouseArrayTypeMapping($"Array({enumTypeMapping.StoreType})", enumTypeMapping);
+        }
+
+        if (!mappingInfo.ClrType.IsArray)
         {
             return null;
         }
