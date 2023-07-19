@@ -1,8 +1,10 @@
 ﻿using ClickHouse.EntityFrameworkCore.Extensions;
+using ClickHouse.EntityFrameworkCore.Migrations.Design;
 using ClickHouse.EntityFrameworkCore.Scaffolding.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Migrations.Design;
 using Microsoft.EntityFrameworkCore.Scaffolding;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -15,13 +17,20 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        //Debugger.Launch();
+        Debugger.Launch();
+
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
         }
 
         services.AddEntityFrameworkClickHouse()
-            .AddSingleton<IDatabaseModelFactory, ClickHouseDatabaseModelFactory>();
+            .AddSingleton<IAnnotationCodeGenerator, ClickHouseAnnotationCodeGenerator>()
+            .AddSingleton<IDatabaseModelFactory, ClickHouseDatabaseModelFactory>()
+            .AddSingleton<ICSharpHelper, ClickHouseCSharpHelper>()
+            .AddSingleton<AnnotationCodeGeneratorDependencies, AnnotationCodeGeneratorDependencies>()
+            .AddSingleton<ICSharpMigrationOperationGenerator, ClickHouseCSharpMigrationOperationGenerator>()
+            .AddSingleton<IMigrationsCodeGenerator, ClickHouseCSharpMigrationsGenerator>()
+            ;
     }
 }
