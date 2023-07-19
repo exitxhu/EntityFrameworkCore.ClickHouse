@@ -26,8 +26,8 @@ public class ClickHouseTypeMappingSource : RelationalTypeMappingSource
         { typeof(short), new ShortTypeMapping("Int16") },
         { typeof(uint), new UIntTypeMapping("UInt32") },
         { typeof(ushort), new UShortTypeMapping("UInt16") },
-        { typeof(DateTime), new DateOnlyTypeMapping("DateTime") },
-        { typeof(DateOnly), new FloatTypeMapping("Date") },
+        { typeof(DateTime), new DateTimeTypeMapping("DateTime") },
+        { typeof(DateOnly), new DateOnlyTypeMapping("Date") },
         { typeof(double), new DoubleTypeMapping("Float64") },
         { typeof(float), new FloatTypeMapping("Float32") },
         { typeof(Guid), new GuidTypeMapping("UUID") }

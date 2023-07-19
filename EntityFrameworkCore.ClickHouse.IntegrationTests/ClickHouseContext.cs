@@ -19,7 +19,6 @@ public class ClickHouseContext : DbContext
 {
     public ClickHouseContext()
     {
-        Debugger.Launch();
     }
     public DbSet<SimpleEntity> SimpleEntities { get; set; }
 

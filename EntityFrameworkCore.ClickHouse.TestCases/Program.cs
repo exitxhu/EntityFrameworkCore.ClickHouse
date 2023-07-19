@@ -27,7 +27,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        //Debugger.Launch();
+        Debugger.Launch();
 
         if (services == null)
         {
@@ -53,7 +53,7 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        Debugger.Launch();
+        //Debugger.Launch();
 
         // Add services to the container.
         builder.Services.AddControllers();

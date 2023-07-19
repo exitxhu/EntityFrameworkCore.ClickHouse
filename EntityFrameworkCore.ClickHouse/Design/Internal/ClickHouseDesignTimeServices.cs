@@ -15,7 +15,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        Debugger.Launch();
+        //Debugger.Launch();
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));

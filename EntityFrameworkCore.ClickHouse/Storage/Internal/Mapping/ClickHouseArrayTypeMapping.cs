@@ -39,7 +39,6 @@ public class ClickHouseArrayTypeMapping : RelationalTypeMapping
 
     public override Expression GenerateCodeLiteral(object value)
     {
-        Debugger.Launch();
         return base.GenerateCodeLiteral(value);
     }
 
