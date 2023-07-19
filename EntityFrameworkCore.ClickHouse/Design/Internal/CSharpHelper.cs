@@ -1575,8 +1575,15 @@ public class ClickHouseCSharpHelper : ICSharpHelper
         return false;
     }
 
-    public string Literal(Enum value)
+    public string Literal(Enum value, string fullName = null)
     {
-        throw new NotImplementedException();
+        var type = value.GetType();
+        var name = Enum.GetName(type, value);
+
+        return name == null
+            ? type.IsDefined(typeof(FlagsAttribute), false)
+                ? GetCompositeEnumValue(type, value, fullName)
+                : $"({Reference(type)}){UnknownLiteral(Convert.ChangeType(value, Enum.GetUnderlyingType(type)))}"
+            : GetSimpleEnumValue(type, name, fullName);
     }
 }

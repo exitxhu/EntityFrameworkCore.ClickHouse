@@ -27,8 +27,9 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        Debugger.Launch();
-
+       // Debugger.Launch();
+        Console.WriteLine("IDesignTimeServices runned");
+        Debug.Print("IDesignTimeServices runned");
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
