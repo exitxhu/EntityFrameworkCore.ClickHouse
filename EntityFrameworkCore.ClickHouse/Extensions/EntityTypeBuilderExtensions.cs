@@ -85,7 +85,9 @@ public static class EntityTypeBuilderExtensions
     }
     public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPartitionBy<T, U>(
         [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
-        [NotNull] Expression<Func<T, U>> PartitionBy)
+        [NotNull] Expression<Func<T, U>> PartitionBy,
+        PartitionByDateFormat? format = null
+        )
    where T : class
     {
         if (builder == null)
@@ -102,10 +104,37 @@ public static class EntityTypeBuilderExtensions
             : PartitionBy.Body is NewExpression nex
                 ? nex.AnynomousObject()
                 : throw new Exception("Clickhouse table, Expression type is not valid in this context");
+        builder.Engine.PartitionBy = format switch
+        {
+            PartitionByDateFormat.Second => $"toYYYYMMDDhhmmss({partitionByString})",
+            PartitionByDateFormat.Day => $"toYYYYMMDD({partitionByString})",
+            PartitionByDateFormat.Month => $"toYYYYMM({partitionByString})",
+            null => partitionByString
+        };
+        builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
+        return builder;
+    }
+    public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPartitionBy<T, U>(
+    [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
+    string partitionByString
+    )
+where T : class
+    {
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+        if (string.IsNullOrEmpty(partitionByString))
+        {
+            throw new ArgumentNullException(nameof(partitionByString));
+        }
+
         builder.Engine.PartitionBy = partitionByString;
         builder.Builder.Metadata.SetOrRemoveAnnotation(builder.Engine.EngineType, builder.Engine.Serialize());
         return builder;
     }
+
     public static ClickHouseEntityMergeTreeConigurationBuilder<T> HasPrimaryKey<T, U>(
         [NotNull] this ClickHouseEntityMergeTreeConigurationBuilder<T> builder,
         [NotNull] Expression<Func<T, U>> PrimaryKey)
@@ -197,4 +226,20 @@ internal static class ClickHouseEngineConfigExtensions
         var des = string.Join(",", exp.Members.Select(n => n.Name));
         return des;
     }
+}
+
+public enum PartitionByDateFormat
+{
+    /// <summary>
+    /// toYYYYMMDDhhmmss()
+    /// </summary>
+    Second,
+    /// <summary>
+    /// toYYYYMMDD()
+    /// </summary>
+    Day,
+    /// <summary>
+    /// toYYYYMM()
+    /// </summary>
+    Month,
 }

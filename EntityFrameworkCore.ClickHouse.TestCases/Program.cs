@@ -27,7 +27,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-       // Debugger.Launch();
+        Debugger.Launch();
         Console.WriteLine("IDesignTimeServices runned");
         Debug.Print("IDesignTimeServices runned");
         if (services == null)
@@ -129,6 +129,7 @@ public class ClickHouseContext : ClickHouseDbContext
         var user = modelBuilder.Entity<User>();
         user.HasPostGresEngine("User", "Accounting");
 
+
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -195,7 +196,7 @@ public class WebStore
 
 
 }
-public class User 
+public class User
 
 {
     [Key]
@@ -209,9 +210,9 @@ public class User
     public int[] MyProperty { get; set; }
     public bool Agreement { get; set; }
     public List<KycStatusEnum> KycStatus { get; set; }
-    public KycStatusEnum Status  { get; set; }
+    public KycStatusEnum Status { get; set; }
 }
-    [Owned]
+[Owned]
 public class Price : AbstractValueObject
 {
     public long Amount { get; set; }
