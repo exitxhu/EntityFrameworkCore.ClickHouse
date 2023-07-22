@@ -23,7 +23,7 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var t = _clickHouseContext.User
+            var t = _clickHouseContext.ClickHistories
                 //.Include(a => a.WebStore)
               //  .Where(a => a.MediaId == 2191)
              //   .OrderByDescending(a => a.OrderId)

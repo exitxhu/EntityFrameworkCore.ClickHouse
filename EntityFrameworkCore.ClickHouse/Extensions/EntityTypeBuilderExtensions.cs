@@ -213,6 +213,30 @@ where T : class
 
         return builder;
     }
+    /// <summary>
+    /// Get table and schema From builder.MetaData
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static EntityTypeBuilder<T> HasPostGresEngine<T>(
+[NotNull] this EntityTypeBuilder<T> builder)
+where T : class
+    {
+        if (builder == null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+        var engine = new PostgreSQLEngine(
+        builder.Metadata.GetDefaultTableName(),
+        builder.Metadata.GetSchema());
+
+        builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine.Serialize());
+
+        return builder;
+    }
 }
 internal static class ClickHouseEngineConfigExtensions
 {

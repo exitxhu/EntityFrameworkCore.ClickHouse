@@ -21,10 +21,7 @@ public class ClickHouseDbContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-       // Debugger.Launch();
         var entityTypes = modelBuilder.Model.GetEntityTypes();
-       
-
         foreach (var entityType in entityTypes)
         {
             entityType.SetSchema(null);

@@ -17,20 +17,12 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        Debugger.Launch();
-        Console.WriteLine("IDesignTimeServices runned");
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
         }
 
-        services.AddEntityFrameworkClickHouse()
-            .AddSingleton<IAnnotationCodeGenerator, ClickHouseAnnotationCodeGenerator>()
-            .AddSingleton<IDatabaseModelFactory, ClickHouseDatabaseModelFactory>()
-            .AddSingleton<ICSharpHelper, ClickHouseCSharpHelper>()
-            .AddSingleton<AnnotationCodeGeneratorDependencies, AnnotationCodeGeneratorDependencies>()
-            .AddSingleton<ICSharpMigrationOperationGenerator, ClickHouseCSharpMigrationOperationGenerator>()
-            .AddSingleton<IMigrationsCodeGenerator, ClickHouseCSharpMigrationsGenerator>()
-            ;
+        services
+            .AddEntityFrameworkClickHouseDesignTime();
     }
 }

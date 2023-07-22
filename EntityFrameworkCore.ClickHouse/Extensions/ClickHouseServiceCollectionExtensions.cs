@@ -7,6 +7,7 @@ using ClickHouse.EntityFrameworkCore.Internal;
 using ClickHouse.EntityFrameworkCore.Metadata.Conventions;
 using ClickHouse.EntityFrameworkCore.Metadata.Internal;
 using ClickHouse.EntityFrameworkCore.Migrations;
+using ClickHouse.EntityFrameworkCore.Migrations.Design;
 using ClickHouse.EntityFrameworkCore.Migrations.Internal;
 using ClickHouse.EntityFrameworkCore.Query.Internal;
 using ClickHouse.EntityFrameworkCore.Scaffolding.Internal;
@@ -19,6 +20,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations.Design;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -67,4 +69,20 @@ public static class ClickHouseServiceCollectionExtensions
 
         return serviceCollection;
     }
+    public static IServiceCollection AddEntityFrameworkClickHouseDesignTime([NotNull] this IServiceCollection serviceCollection)
+    {
+        
+            serviceCollection
+            .AddEntityFrameworkClickHouse()
+            .AddSingleton<IAnnotationCodeGenerator, ClickHouseAnnotationCodeGenerator>()
+            .AddSingleton<IDatabaseModelFactory, ClickHouseDatabaseModelFactory>()
+            .AddSingleton<ICSharpHelper, ClickHouseCSharpHelper>()
+            .AddSingleton<AnnotationCodeGeneratorDependencies, AnnotationCodeGeneratorDependencies>()
+            .AddSingleton<ICSharpMigrationOperationGenerator, ClickHouseCSharpMigrationOperationGenerator>()
+            .AddSingleton<IMigrationsCodeGenerator, ClickHouseCSharpMigrationsGenerator>()
+            .AddSingleton<MigrationsCodeGeneratorDependencies, MigrationsCodeGeneratorDependencies>()
+            ;
+        return serviceCollection;
+    }
+
 }

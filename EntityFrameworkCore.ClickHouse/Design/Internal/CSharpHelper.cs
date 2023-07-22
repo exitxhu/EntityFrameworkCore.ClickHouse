@@ -1577,6 +1577,6 @@ public class ClickHouseCSharpHelper : ICSharpHelper
 
     public string Literal(Enum value)
     {
-        return Literal(value);
+        return Literal(value, false);
     }
 }

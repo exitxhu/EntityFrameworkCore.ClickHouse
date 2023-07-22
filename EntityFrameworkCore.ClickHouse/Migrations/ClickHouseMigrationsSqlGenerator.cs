@@ -26,14 +26,36 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     {
         var columnType = operation.ColumnType ?? GetColumnType(schema, table, name, operation, model);
         builder
-            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(name, schema))
+            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(name))
             .Append(" ")
             .Append(operation.IsNullable && !operation.ClrType.IsArray ? $" Nullable({columnType})" : columnType);
     }
+    #region Skup Operation
     protected override void Generate(EnsureSchemaOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
-
     }
+    protected override void Generate(AddForeignKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+    }
+    protected override void Generate(AddUniqueConstraintOperation operation, IModel model, MigrationCommandListBuilder builder)
+    {
+    }
+    protected override void Generate(CreateIndexOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+    }
+    protected override void Generate(DropForeignKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+    }
+    protected override void Generate(DropIndexOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+    }
+    protected override void Generate(DropPrimaryKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+    }
+    protected override void Generate(DropUniqueConstraintOperation operation, IModel model, MigrationCommandListBuilder builder)
+    {
+    } 
+    #endregion
     protected override void Generate(MigrationOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
         if (operation is ClickHouseCreateDatabaseOperation cdo)
@@ -92,7 +114,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
             createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
         {
-            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model, operation.Schema);
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model);
             Generate(createTableOperation, model, builder);
             return;
         }
@@ -119,7 +141,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
             createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
         {
-            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model, operation.Schema);
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model);
             Generate(createTableOperation, model, builder);
             return;
         }
@@ -148,7 +170,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
             createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
         {
-            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model, operation.Schema);
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model);
             Generate(createTableOperation, model, builder);
         }
         else
@@ -215,7 +237,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
 
         builder
             .Append(statement)
-            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Name, operation.Schema))
+            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(operation.Name))
             .AppendLine(" (");
 
         using (builder.Indent())

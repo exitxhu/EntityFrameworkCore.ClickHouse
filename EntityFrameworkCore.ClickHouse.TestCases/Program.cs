@@ -27,7 +27,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        Debugger.Launch();
+        //Debugger.Launch();
         Console.WriteLine("IDesignTimeServices runned");
         Debug.Print("IDesignTimeServices runned");
         if (services == null)
@@ -35,17 +35,7 @@ public class ClickHouseDesignTimeServices : IDesignTimeServices
             throw new ArgumentNullException(nameof(services));
         }
 
-        services.AddEntityFrameworkClickHouse()
-            .AddSingleton<IAnnotationCodeGenerator, ClickHouseAnnotationCodeGenerator>()
-            .AddSingleton<IDatabaseModelFactory, ClickHouseDatabaseModelFactory>()
-            .AddSingleton<ICSharpHelper, ClickHouseCSharpHelper>()
-            .AddSingleton<AnnotationCodeGeneratorDependencies, AnnotationCodeGeneratorDependencies>()
-            .AddSingleton<ICSharpMigrationOperationGenerator, ClickHouseCSharpMigrationOperationGenerator>()
-            .AddSingleton<IMigrationsCodeGenerator, ClickHouseCSharpMigrationsGenerator>()
-
-
-            ;
-
+        services.AddEntityFrameworkClickHouseDesignTime();
     }
 }
 
@@ -95,10 +85,12 @@ public class Program
 
 public class ClickHouseContext : ClickHouseDbContext
 {
-    //public DbSet<Order> Order { get; set; }
+    public DbSet<Order> Order { get; set; }
     //public DbSet<Link> Links { get; set; }
-    public DbSet<User> User { get; set; }
+    //public DbSet<User> User { get; set; }
     //public DbSet<Media> Medias{ get; set; }
+
+    public DbSet<ClickHistory> ClickHistories { get; set; }
     public ClickHouseContext(DbContextOptions op) : base(op)
     {
 
@@ -106,30 +98,39 @@ public class ClickHouseContext : ClickHouseDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //Debugger.Launch();
-        base.OnModelCreating(modelBuilder);
-        //var ord = modelBuilder.Entity<Order>();
-        //ord.HasPostGresEngine("Order", "Order")
-        //    ;
-        //var link = modelBuilder.Entity<Link>();
-        //link.HasPostGresEngine("Link", "Link");
+        var ord = modelBuilder.Entity<Order>();
+        ord.HasPostGresEngine();
 
-        //var media = modelBuilder.Entity<Media>();
-        //link.HasPostGresEngine("Media", "Media");
+        var link = modelBuilder.Entity<Link>();
+        link.HasPostGresEngine("Link", "Link");
 
-        //var es = modelBuilder.Entity<WebStore>();
-        //es.HasPostGresEngine("WebStore", "WebStore");
+        var ch = modelBuilder.Entity<ClickHistory>();
+        ch.HasPostGresEngine("ClickHistory", "Click");
+
+        var media = modelBuilder.Entity<Media>();
+        link.HasPostGresEngine("Media", "Media");
+
+        var es = modelBuilder.Entity<WebStore>();
+        es.HasPostGresEngine("WebStore", "WebStore");
 
         //es.Property(a => a.RecheckHeaders)
         //     .HasConversion(a => a.ToString(), a => new KeyValueVO(a));
 
-        //es.Property(a => a.RecheckHeaders)
-        //    .HasConversion(a => a.Select(n => n.ToString()).ToArray(), a => a.Select(n => new KeyValueVO(n))
-        //    .ToArray());
+        es.Property(a => a.RecheckHeaders)
+            .HasConversion(a => a.Select(n => n.ToString()).ToArray(), a => a.Select(n => new KeyValueVO(n))
+            .ToList());
 
         var user = modelBuilder.Entity<User>();
         user.HasPostGresEngine("User", "Accounting");
 
+        var notif = modelBuilder.Entity<NotificationTemplates>();
+        notif.Property(a => a.Variables)
+            .HasConversion(n => n.Select(a => a.ToString()),
+            n => n.Select(a => new KeyValueVO(a)).ToList());
+        notif.HasPostGresEngine("NotificationTemplates", "Notification");
 
+
+        base.OnModelCreating(modelBuilder);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -151,6 +152,7 @@ public record Media
     public int MediaId { get; set; }
     public string Name { get; set; }
 }
+
 [Table("Order", Schema = "Order")]
 [ClickHouseTable(TableCreationStrategy.CREATE_OR_REPLACE)]
 public record Order
@@ -160,6 +162,8 @@ public record Order
     public long OrderId { get; set; }
 
     public int? LinkId { get; set; }
+    public ClickHistory ClickHistory { get; set; }
+    public long? ClickHistoryId { get; set; }
     public Link Link { get; set; }
     [ClickHouseIgnore]
     public Media Media { get; set; }
@@ -236,6 +240,18 @@ public class Price : AbstractValueObject
         yield return Amount;
         yield return Discount;
     }
+}
+[Table(nameof(NotificationTemplates), Schema = "Notification")]
+public record NotificationTemplates 
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int NotificationId { get; set; }
+    public string Body { get; set; }
+    [MaxLength(20)]
+    public string Culture { get; set; }
+    public List<KeyValueVO> Variables { get; set; }
+    public string Subject { get; set; }
 }
 public abstract class AbstractValueObject
 {
@@ -330,4 +346,37 @@ public enum KycStatusEnum
     VatDocumentConfirmed = 7,
     [Description("روزنامه رسمی")]
     NewsPaperDocumentConfirmed = 8
+}
+
+[Table("ClickHistory", Schema = "Click")]
+[Index(nameof(AffiliateId), IsUnique = true)]
+[Index(nameof(LinkId), IsUnique = false)]
+[Index(nameof(CreateDate), IsUnique = false)]
+
+public class ClickHistory
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long ClickHistoryId { get; set; }
+
+    [Editable(false)]
+    public virtual DateTime CreateDate { get; set; } = DateTime.UtcNow;
+    [MaxLength(50)]
+    public string AffiliateId { get; set; } = Guid.NewGuid().ToString();
+    [StringLength(2 << 10)]
+    public string Url { get; set; }
+    [StringLength(2 << 4)]
+    public string RemoteIpAddress { get; set; }
+    [StringLength(2 << 10)]
+    public string Referer { get; set; }
+    public string Detail { get; set; }
+    public int LinkId { get; set; }
+    [StringLength(64)]
+    public string DeviceId { get; set; }
+    [StringLength(64)]
+    public string OldHistoryId { get; set; }
+    [StringLength(64)]
+    public string OldLinkId { get; set; }
+    [StringLength(20)]
+    public long? OldHistoryIncId { get; set; }
 }
