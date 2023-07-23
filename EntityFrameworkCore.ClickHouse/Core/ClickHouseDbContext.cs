@@ -1,5 +1,7 @@
-﻿using ClickHouse.EntityFrameworkCore.Metadata;
+﻿using ClickHouse.EntityFrameworkCore.Extensions;
+using ClickHouse.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,12 +23,6 @@ public class ClickHouseDbContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var entityTypes = modelBuilder.Model.GetEntityTypes();
-        foreach (var entityType in entityTypes)
-        {
-            var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
-                ?? new ClickHouseTableAttribute(TableCreationStrategy.CREATE);
-            entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
-        }
+
     }
 }

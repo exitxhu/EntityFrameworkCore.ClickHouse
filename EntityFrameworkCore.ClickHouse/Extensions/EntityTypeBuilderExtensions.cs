@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using ClickHouse.EntityFrameworkCore.Metadata;
 using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using ClickHouse.EntityFrameworkCore.Storage.Engines.Configur;
@@ -408,6 +409,22 @@ where T : class
         builder.Metadata.SetOrRemoveAnnotation(engine.EngineType, engine.Serialize());
 
         return builder;
+    }
+
+    public static IMutableEntityType HasCreateStrategy(this IMutableEntityType entityType, TableCreationStrategy strat)
+    {
+        var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
+            ?? new ClickHouseTableAttribute(strat);
+        entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
+        return entityType;
+    }
+    public static EntityTypeBuilder<T> HasCreateStrategy<T>(this EntityTypeBuilder<T> entityType, TableCreationStrategy strat)
+        where T : class
+    {
+        var t = entityType.Metadata.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
+            ?? new ClickHouseTableAttribute(strat);
+        entityType.Metadata.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
+        return entityType;
     }
 }
 internal static class ClickHouseEngineConfigExtensions

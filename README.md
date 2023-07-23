@@ -12,7 +12,9 @@
 
 like this:
 `var user = modelBuilder.Entity<User>();`
-`user.HasPostGresEngine("User", "Accounting");`
+`user.HasPostGresEngine("User", "Accounting");` 
+
+- if you dont provide any argument for HasPostGresEngine(), it will invoke GetTableName() and GetSchema() to map.
 
 * To apply basic options for merge tree falmily use these:
 
@@ -39,3 +41,13 @@ you can chain them as well.
             a.Settings.IndexGranularityBytes = 1024;
             a.Settings.MinRowsForWidePart = 512;
         });`
+
+
+* to configure entity types dynamically you can use these extension methods:
+
+        `var entityTypes = modelBuilder.Model.GetEntityTypes();`
+        `foreach (var entityType in entityTypes)`
+        `{`
+        `    entityType.HasCreateStrategy(TableCreationStrategy.CREATE);`
+        `    entityType.HasPostGresEngine();`
+        `}`
