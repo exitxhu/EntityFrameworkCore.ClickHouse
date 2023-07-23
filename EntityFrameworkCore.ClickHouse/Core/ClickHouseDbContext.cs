@@ -27,7 +27,6 @@ public class ClickHouseDbContext : DbContext
             var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
                 ?? new ClickHouseTableAttribute(TableCreationStrategy.CREATE);
             entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
-            entityType.
         }
     }
 }
