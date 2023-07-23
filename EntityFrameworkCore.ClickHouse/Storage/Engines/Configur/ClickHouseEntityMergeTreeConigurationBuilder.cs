@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,10 @@ namespace ClickHouse.EntityFrameworkCore.Storage.Engines.Configur;
 public class ClickHouseEntityMergeTreeConigurationBuilder<T> where T : class
 {
     public EntityTypeBuilder<T> Builder{ get; init; }
+    public BaseMergeTreeEngine Engine { get; init; }
+}
+public class ClickHouseEntityMergeTreeConigurationBuilder
+{
+    public IMutableEntityType Builder { get; init; }
     public BaseMergeTreeEngine Engine { get; init; }
 }

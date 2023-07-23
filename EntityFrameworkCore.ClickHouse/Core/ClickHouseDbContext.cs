@@ -24,11 +24,10 @@ public class ClickHouseDbContext : DbContext
         var entityTypes = modelBuilder.Model.GetEntityTypes();
         foreach (var entityType in entityTypes)
         {
-            entityType.SetSchema(null);
             var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
                 ?? new ClickHouseTableAttribute(TableCreationStrategy.CREATE);
             entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
-
+            entityType.
         }
     }
 }
