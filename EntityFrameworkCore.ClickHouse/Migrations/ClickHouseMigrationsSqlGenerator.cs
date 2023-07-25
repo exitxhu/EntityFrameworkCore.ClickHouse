@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ClickHouse.EntityFrameworkCore.Migrations;
+using System.Diagnostics;
+
 namespace Microsoft.EntityFrameworkCore.Migrations.Internal;
 
 
@@ -40,6 +42,9 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     protected override void Generate(AddUniqueConstraintOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
     }
+    protected override void Generate(AddPrimaryKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+    }
     protected override void Generate(CreateIndexOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
     }
@@ -54,7 +59,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     }
     protected override void Generate(DropUniqueConstraintOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
-    } 
+    }
     #endregion
     protected override void Generate(MigrationOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
@@ -258,7 +263,37 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         builder.AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator);
         EndStatement(builder);
     }
+    protected override void Generate(RenameTableOperation operation, IModel model, MigrationCommandListBuilder builder)
+    {
+        var models = model.GetEntityTypes();
+        var thisType = models.FirstOrDefault(a => a.GetTableName() == operation.NewName);
+        var thisAnnotaions = thisType.GetAnnotations().ToList();
+        TableCreationStrategy createAnnotation = GetCreateStrategy(thisAnnotaions);
+        var engineAnnotation = thisType.GetAnnotations()?.FirstOrDefault(a => a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
+        var engine = engineAnnotation != null && engineAnnotation.Value != null
+            ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(), engineAnnotation.Name)
+            : new StripeLogEngine();
 
+        if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation != TableCreationStrategy.CREATE_OR_REPLACE
+            )
+        {
+            throw new InvalidOperationException($"Click house dont support Add/Drop column in table engin type of {engine.EngineType}, please specify create strategy of {TableCreationStrategy.CREATE_OR_REPLACE} on table, to recreate the table");
+        }
+        else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
+        {
+            DropTableOperation dropTableOperation = new DropTableOperation()
+            {
+                Name = operation.Name,
+            };
+            Generate(dropTableOperation, model, builder);
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.NewName, model);
+            Generate(createTableOperation, model, builder);
+        }
+        else
+            base.Generate(operation, model, builder);
+    }
 
     private static IEnumerable<IColumn> GetSortedColumns(ITable table)
     {

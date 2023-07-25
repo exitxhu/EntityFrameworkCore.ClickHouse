@@ -90,7 +90,7 @@ public class ClickHouseContext : ClickHouseDbContext
     //public DbSet<User> User { get; set; }
     //public DbSet<Media> Medias{ get; set; }
 
-    public DbSet<ClickHistory> ClickHistories { get; set; }
+    //public DbSet<ClickHistory> ClicjhhfshgjkjklkHistories { get; set; }
     public ClickHouseContext(DbContextOptions op) : base(op)
     {
 
@@ -98,39 +98,42 @@ public class ClickHouseContext : ClickHouseDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //Debugger.Launch();
-        var ord = modelBuilder.Entity<Order>();
-        ord.HasPostGresEngine();
 
-        var link = modelBuilder.Entity<Link>();
-        link.HasPostGresEngine("Link", "Link");
+        modelBuilder.Entity<aa>().HasPostGresEngine().HasKey(a => a.a);
+        var ord = modelBuilder.Entity<Order>().HasCreateStrategy(TableCreationStrategy.CREATE_OR_REPLACE);
+        //ord.HasKey(a=>new {a.LinkId, a.OrderId});
+        ord.HasReplacingMergeTreeEngine();
 
-        var ch = modelBuilder.Entity<ClickHistory>();
-        ch.HasPostGresEngine("ClickHistory", "Click");
+        //var link = modelBuilder.Entity<Link>();
+        //link.HasPostGresEngine("Link", "Link");
 
-        var media = modelBuilder.Entity<Media>();
-        link.HasPostGresEngine("Media", "Media");
+        //var ch = modelBuilder.Entity<ClickHistory>();
+        //ch.HasPostGresEngine("ClickHistory", "Click");
 
-        var es = modelBuilder.Entity<WebStore>();
-        es.HasPostGresEngine("WebStore", "WebStore");
+        //var media = modelBuilder.Entity<Media>();
+        //link.HasPostGresEngine("Media", "Media");
+
+        //var es = modelBuilder.Entity<WebStore>();
+        //es.HasPostGresEngine("WebStore", "WebStore");
+
+        ////es.Property(a => a.RecheckHeaders)
+        ////     .HasConversion(a => a.ToString(), a => new KeyValueVO(a));
 
         //es.Property(a => a.RecheckHeaders)
-        //     .HasConversion(a => a.ToString(), a => new KeyValueVO(a));
+        //    .HasConversion(a => a.Select(n => n.ToString()).ToArray(), a => a.Select(n => new KeyValueVO(n))
+        //    .ToList());
 
-        es.Property(a => a.RecheckHeaders)
-            .HasConversion(a => a.Select(n => n.ToString()).ToArray(), a => a.Select(n => new KeyValueVO(n))
-            .ToList());
+        //var user = modelBuilder.Entity<User>();
+        //user.HasPostGresEngine("User", "Accounting");
 
-        var user = modelBuilder.Entity<User>();
-        user.HasPostGresEngine("User", "Accounting");
-
-        var notif = modelBuilder.Entity<NotificationTemplates>();
-        notif.Property(a => a.Variables)
-            .HasConversion(n => n.Select(a => a.ToString()),
-            n => n.Select(a => new KeyValueVO(a)).ToList());
-        notif.HasPostGresEngine("NotificationTemplates", "Notification");
+        //var notif = modelBuilder.Entity<NotificationTemplates>();
+        //notif.Property(a => a.Variables)
+        //    .HasConversion(n => n.Select(a => a.ToString()),
+        //    n => n.Select(a => new KeyValueVO(a)).ToList());
+        //notif.HasPostGresEngine("NotificationTemplates", "Notification");
 
 
-        base.OnModelCreating(modelBuilder);
+        //base.OnModelCreating(modelBuilder);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -140,13 +143,12 @@ public class ClickHouseContext : ClickHouseDbContext
 
     }
 }
-[ClickHouseTable(TableCreationStrategy.CREATE_OR_REPLACE)]
+public record aa(int a);
 public record Link
 {
     public int LinkId { get; set; }
     public string Name { get; set; }
 }
-[ClickHouseTable(TableCreationStrategy.CREATE_OR_REPLACE)]
 public record Media
 {
     public int MediaId { get; set; }
@@ -154,29 +156,21 @@ public record Media
 }
 
 [Table("Order", Schema = "Order")]
-[ClickHouseTable(TableCreationStrategy.CREATE_OR_REPLACE)]
 public record Order
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long OrderId { get; set; }
 
-    public int? LinkId { get; set; }
-    public ClickHistory ClickHistory { get; set; }
+    public int LinkId { get; set; }
     public long? ClickHistoryId { get; set; }
-    public Link Link { get; set; }
-    [ClickHouseIgnore]
-    public Media Media { get; set; }
     public int? MediaId { get; set; }
     public int? WebStoreId { get; set; }
-    public WebStore WebStore { get; set; }
 }
 public enum OrderPaymentStatus
 {
     WaitingForInvoice,
     WaitingForPayment,
 }
-[ClickHouseTable(TableCreationStrategy.CREATE_OR_REPLACE)]
 public class WebStore
 {
     [Key]
@@ -242,7 +236,7 @@ public class Price : AbstractValueObject
     }
 }
 [Table(nameof(NotificationTemplates), Schema = "Notification")]
-public record NotificationTemplates 
+public record NotificationTemplates
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

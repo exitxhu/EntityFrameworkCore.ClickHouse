@@ -413,16 +413,16 @@ where T : class
 
     public static IMutableEntityType HasCreateStrategy(this IMutableEntityType entityType, TableCreationStrategy strat)
     {
-        var t = entityType.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
-            ?? new ClickHouseTableAttribute(strat);
+        var t = new ClickHouseTableAttribute(strat);
         entityType.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
         return entityType;
     }
     public static EntityTypeBuilder<T> HasCreateStrategy<T>(this EntityTypeBuilder<T> entityType, TableCreationStrategy strat)
         where T : class
     {
-        var t = entityType.Metadata.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
-            ?? new ClickHouseTableAttribute(strat);
+        //entityType.Metadata.ClrType.GetCustomAttribute<ClickHouseTableAttribute>()
+
+        var t = new ClickHouseTableAttribute(strat);
         entityType.Metadata.SetOrRemoveAnnotation(nameof(ClickHouseTableAttribute), t);
         return entityType;
     }
