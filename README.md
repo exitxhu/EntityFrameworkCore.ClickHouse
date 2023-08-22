@@ -47,9 +47,9 @@ you can chain them as well.
 
 * to configure entity types dynamically you can use these extension methods:
 
-        `var entityTypes = modelBuilder.Model.GetEntityTypes();`
-        `foreach (var entityType in entityTypes)`
-        `{`
-        `    entityType.HasCreateStrategy(TableCreationStrategy.CREATE);`
-        `    entityType.HasPostGresEngine();`
-        `}`
+        `var entityTypes = modelBuilder.Model.GetEntityTypes();
+        foreach (var entityType in entityTypes)
+        {
+            entityType.HasCreateStrategy(TableCreationStrategy.CREATE);
+            entityType.HasPostGresEngine();
+        }`
