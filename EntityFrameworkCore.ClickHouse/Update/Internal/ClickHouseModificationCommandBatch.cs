@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using ClickHouse.Client.ADO;
 using ClickHouse.Client.ADO.Readers;
 using ClickHouse.EntityFrameworkCore.Storage.Internal;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,7 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
         //}
 
         protected override bool IsValid() => true;
-
+        
         protected override void Consume(RelationalDataReader reader)
         {
             var clickHouseReader = (ClickHouseDataReader)reader.DbDataReader;
@@ -57,7 +58,6 @@ namespace ClickHouse.EntityFrameworkCore.Update.Internal
                         //!ModificationCommands[nextPropagating].RequiresResultPropagation
                         ;
                         nextPropagating++) ;
-
                     if (nextPropagating == ModificationCommands.Count)
                     {
                         Debug.Assert(!clickHouseReader.NextResult(), "Expected less resultsets");

@@ -99,10 +99,11 @@ public class ClickHouseContext : ClickHouseDbContext
     {
         //Debugger.Launch();
 
-        modelBuilder.Entity<aa>().HasPostGresEngine().HasKey(a => a.a);
         var ord = modelBuilder.Entity<Order>().HasCreateStrategy(TableCreationStrategy.CREATE_OR_REPLACE);
         //ord.HasKey(a=>new {a.LinkId, a.OrderId});
-        ord.HasReplacingMergeTreeEngine();
+        ord.HasReplacingMergeTreeEngine()
+            .HasPrimaryKey(a => new { a.OrderId, a.Date })
+            .HasPartitionBy(a => a.Date, PartitionByDateFormat.Month);
 
         //var link = modelBuilder.Entity<Link>();
         //link.HasPostGresEngine("Link", "Link");
@@ -143,234 +144,17 @@ public class ClickHouseContext : ClickHouseDbContext
 
     }
 }
-public record aa(int a);
-public record Link
-{
-    public int LinkId { get; set; }
-    public string Name { get; set; }
-}
-public record Media
-{
-    public int MediaId { get; set; }
-    public string Name { get; set; }
-}
 
 [Table("Order", Schema = "Order")]
 public record Order
 {
     [Key]
     public long OrderId { get; set; }
-
-    public int LinkId { get; set; }
-    public long? ClickHistoryId { get; set; }
-    public int? MediaId { get; set; }
-    public int? WebStoreId { get; set; }
+    public DateTime Date { get; set; }
+    public long Amount { get; set; }
 }
 public enum OrderPaymentStatus
 {
     WaitingForInvoice,
     WaitingForPayment,
-}
-public class WebStore
-{
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int WebStoreId { get; set; }
-
-    public string AlternativeUrl { get; set; }
-
-    public List<KeyValueVO> RecheckHeaders { get; set; }
-    public DateTime CreateDate { get; set; }
-    public DateTime RecheckFromDate { get; set; }
-    public string About { get; set; }
-    public string TradeName { get; set; }
-
-    public int? DependingWebStoreId { get; set; }
-    [JsonIgnore]
-    public WebStore DependingWebStore { get; set; }
-    [NotMapped]
-    public string DependingWebStoreName { get; set; }
-
-
-
-}
-public class User
-
-{
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int UserId { get; set; }
-    [StringLength(50)]
-    public string Mobile { get; set; } //username
-    //[JsonIgnore]
-    [JsonIgnore]
-    public string PasswordHash { get; set; }
-    public int[] MyProperty { get; set; }
-    public bool Agreement { get; set; }
-    public List<KycStatusEnum> KycStatus { get; set; }
-    public KycStatusEnum Status { get; set; }
-}
-[Owned]
-public class Price : AbstractValueObject
-{
-    public long Amount { get; set; }
-    public long Discount { get; set; }
-
-
-    public Price(decimal amount, decimal discount) : this((long)amount, (long)discount)
-    {
-    }
-    public Price(long amount, long discount)
-    {
-        Amount = amount;
-        Discount = discount;
-    }
-    public Price()
-    {
-    }
-
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return Amount;
-        yield return Discount;
-    }
-}
-[Table(nameof(NotificationTemplates), Schema = "Notification")]
-public record NotificationTemplates
-{
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int NotificationId { get; set; }
-    public string Body { get; set; }
-    [MaxLength(20)]
-    public string Culture { get; set; }
-    public List<KeyValueVO> Variables { get; set; }
-    public string Subject { get; set; }
-}
-public abstract class AbstractValueObject
-{
-    protected static bool EqualOperator(AbstractValueObject left, AbstractValueObject right)
-    {
-        if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
-        {
-            return false;
-        }
-        return ReferenceEquals(left, null) || left.Equals(right);
-    }
-
-    protected static bool NotEqualOperator(AbstractValueObject left, AbstractValueObject right)
-    {
-        return !(EqualOperator(left, right));
-    }
-
-    protected abstract IEnumerable<object> GetEqualityComponents();
-
-    public override bool Equals(object obj)
-    {
-        if (obj == null || obj.GetType() != GetType())
-        {
-            return false;
-        }
-
-        var other = (AbstractValueObject)obj;
-
-        return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
-    }
-
-    public override int GetHashCode()
-    {
-        return GetEqualityComponents()
-            .Select(x => x is not null ? x.GetHashCode() : 0)
-            .Aggregate((x, y) => x ^ y);
-    }
-    public static bool operator ==(AbstractValueObject left, AbstractValueObject right) => EqualOperator(left, right);
-    public static bool operator !=(AbstractValueObject left, AbstractValueObject right) => !EqualOperator(left, right);
-}
-public class KeyValueVO : AbstractValueObject
-{
-    public KeyValueVO()
-    {
-
-    }
-    public KeyValueVO(string str)
-    {
-        var segs = str.Split(":");
-        if (segs.Length != 2)
-            throw new Exception("KeyValueVO needs an input like \"key:value\" which is not provided correctly");
-        Key = segs[0];
-        Value = segs[1];
-    }
-    public KeyValueVO(string key, string value)
-    {
-        Key = key;
-        Value = value;
-    }
-    public string Key { get; }
-    public string Value { get; }
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return Key;
-        yield return Value;
-    }
-    public static implicit operator string(KeyValueVO vo)
-    {
-        return $"{vo.Key}:{vo.Value}";
-    }
-    public override string ToString()
-    {
-        return this;
-    }
-
-}
-public enum KycStatusEnum
-{
-    [Description("اطلاعات شخصی")]
-    PersonalInfoConfirmed = 1,
-    [Description("اطلاعات شرکت")]
-    CompanyInfoConfirmed = 2,
-    [Description("اطلاعات بانکی")]
-    BankAccountInfoConfirmed = 3,
-    [Description("اطلاعات تماس")]
-    ContactInfoConfirmed = 4,
-    [Description("کارت ملی")]
-    NationalCardConfirmed = 5,
-    [Description("شناسنامه")]
-    IdentityCardConfirmed = 6,
-    [Description("ارزش افزوده")]
-    VatDocumentConfirmed = 7,
-    [Description("روزنامه رسمی")]
-    NewsPaperDocumentConfirmed = 8
-}
-
-[Table("ClickHistory", Schema = "Click")]
-[Index(nameof(AffiliateId), IsUnique = true)]
-[Index(nameof(LinkId), IsUnique = false)]
-[Index(nameof(CreateDate), IsUnique = false)]
-
-public class ClickHistory
-{
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long ClickHistoryId { get; set; }
-
-    [Editable(false)]
-    public virtual DateTime CreateDate { get; set; } = DateTime.UtcNow;
-    [MaxLength(50)]
-    public string AffiliateId { get; set; } = Guid.NewGuid().ToString();
-    [StringLength(2 << 10)]
-    public string Url { get; set; }
-    [StringLength(2 << 4)]
-    public string RemoteIpAddress { get; set; }
-    [StringLength(2 << 10)]
-    public string Referer { get; set; }
-    public string Detail { get; set; }
-    public int LinkId { get; set; }
-    [StringLength(64)]
-    public string DeviceId { get; set; }
-    [StringLength(64)]
-    public string OldHistoryId { get; set; }
-    [StringLength(64)]
-    public string OldLinkId { get; set; }
-    [StringLength(20)]
-    public long? OldHistoryIncId { get; set; }
 }

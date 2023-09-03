@@ -222,7 +222,30 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     }
     protected override void Generate(AlterColumnOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
-        base.Generate(operation, model, builder);
+        var models = model.GetEntityTypes();
+        var thisType = models.FirstOrDefault(a => a.GetTableName() == operation.Table);
+        var thisAnnotaions = thisType.GetAnnotations().ToList();
+        TableCreationStrategy createAnnotation = GetCreateStrategy(thisAnnotaions);
+        var engineAnnotation = thisType.GetAnnotations()?.FirstOrDefault(a => a.Name.EndsWith(ClickHouseAnnotationNames.Engine));
+        var engine = engineAnnotation != null && engineAnnotation.Value != null
+            ? ClickHouseEngine.Deserialize(engineAnnotation.Value.ToString(), engineAnnotation.Name)
+            : new StripeLogEngine();
+
+        if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation != TableCreationStrategy.CREATE_OR_REPLACE
+            )
+        {
+            throw new InvalidOperationException($"Click house dont support alter column in table engin type of {engine.EngineType}, please specify create strategy of {TableCreationStrategy.CREATE_OR_REPLACE} on table, to recreate the table");
+        }
+        else if (engine?.EngineType != ClickHouseEngineTypeConstants.MergeTreeEngine &&
+            createAnnotation == TableCreationStrategy.CREATE_OR_REPLACE)
+        {
+            CreateTableOperation createTableOperation = GetTableCreateModel(operation.Table, model);
+            Generate(createTableOperation, model, builder);
+            return;
+        }
+        else
+            base.Generate(operation, model, builder);
     }
     protected override void Generate(CreateTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {

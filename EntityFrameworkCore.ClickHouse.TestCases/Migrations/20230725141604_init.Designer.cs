@@ -4,6 +4,7 @@ using ClickHouse.EntityFrameworkCore.Metadata;
 using EntityFrameworkCore.ClickHouse.TestCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityFrameworkCore.ClickHouse.TestCases.Migrations
 {
     [DbContext(typeof(ClickHouseContext))]
-    partial class ClickHouseContextModelSnapshot : ModelSnapshot
+    [Migration("20230725141604_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
@@ -27,8 +30,8 @@ namespace EntityFrameworkCore.ClickHouse.TestCases.Migrations
                     b.Property<long>("Amount")
                         .HasColumnType("Int64");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("DateTime");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("Date");
 
                     b.HasKey("OrderId");
 

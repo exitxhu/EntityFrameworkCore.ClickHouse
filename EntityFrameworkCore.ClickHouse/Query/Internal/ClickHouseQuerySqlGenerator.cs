@@ -11,10 +11,50 @@ namespace ClickHouse.EntityFrameworkCore.Query.Internal
 {
     public class ClickHouseQuerySqlGenerator : QuerySqlGenerator
     {
+        private readonly QuerySqlGeneratorDependencies dependencies;
+
         public ClickHouseQuerySqlGenerator(QuerySqlGeneratorDependencies dependencies) : base(dependencies)
         {
+            this.dependencies = dependencies;
+        }
+        protected override Expression VisitTable(TableExpression tableExpression)
+        {
+            Sql
+                .Append(dependencies.SqlGenerationHelper.DelimitIdentifier(tableExpression.Name))
+                .Append(AliasSeparator)
+                .Append(dependencies.SqlGenerationHelper.DelimitIdentifier(tableExpression.Alias));
+
+            return tableExpression;
         }
 
+        protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunctionExpression)
+        {
+            if (sqlFunctionExpression.IsBuiltIn)
+            {
+                if (sqlFunctionExpression.Instance != null)
+                {
+                    Visit(sqlFunctionExpression.Instance);
+                    Sql.Append(".");
+                }
+
+                Sql.Append(sqlFunctionExpression.Name);
+            }
+            else
+            {
+
+                Sql
+                    .Append(dependencies.SqlGenerationHelper.DelimitIdentifier(sqlFunctionExpression.Name));
+            }
+
+            if (!sqlFunctionExpression.IsNiladic)
+            {
+                Sql.Append("(");
+                GenerateList(sqlFunctionExpression.Arguments, e => Visit(e));
+                Sql.Append(")");
+            }
+
+            return sqlFunctionExpression;
+        }
         protected override void GenerateLimitOffset(SelectExpression selectExpression)
         {
             if (selectExpression.Limit != null || selectExpression.Offset != null)

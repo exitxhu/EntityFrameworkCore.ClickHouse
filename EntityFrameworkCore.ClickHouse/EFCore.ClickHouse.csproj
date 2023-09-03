@@ -4,7 +4,7 @@
 		<RootNamespace>ClickHouse.EntityFrameworkCore</RootNamespace>
 		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>11</LangVersion>
-		<PackageVersion>1.1.18</PackageVersion>
+		<PackageVersion>1.1.20</PackageVersion>
 		<Authors>Hadi Bazmi, Forked From Denis Ivanov Repo</Authors>
 		<Description>ClickHouse provider for Entity Framework Core.</Description>
 		<PackageTags>ClickHouse; Entity Framework Core</PackageTags>
@@ -22,7 +22,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ClickHouse.Client" Version="6.7.2" />
+		<PackageReference Include="ClickHouse.Client" Version="6.7.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9" PrivateAssets="none" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.9" PrivateAssets="none" />
