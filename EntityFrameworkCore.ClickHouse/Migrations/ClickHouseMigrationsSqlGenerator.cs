@@ -26,7 +26,9 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     protected override void ColumnDefinition(string schema, string table, string name, ColumnOperation operation, IModel model,
         MigrationCommandListBuilder builder)
     {
-        var columnType = operation.ColumnType ?? GetColumnType(schema, table, name, operation, model);
+        var tasble = model?.GetRelationalModel().FindTable(table, schema);
+        var column = tasble?.FindColumn(name);
+        var columnType = operation.ColumnType ?? GetColumnType(schema, table, name, operation, model) ?? column.StoreType;
         builder
             .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(name))
             .Append(" ")
@@ -249,6 +251,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     }
     protected override void Generate(CreateTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
+        Debugger.Launch();
         var models = model.GetEntityTypes();
         var thisType = models.FirstOrDefault(a => a.GetTableName() == operation.Name);
         var thisAnnotaions = thisType.GetAnnotations().ToList();

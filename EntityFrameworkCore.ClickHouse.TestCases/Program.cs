@@ -152,6 +152,8 @@ public record Order
     public long OrderId { get; set; }
     public DateTime Date { get; set; }
     public long Amount { get; set; }
+    [StringLength(64)]
+    public string MyProperty { get; set; }
 }
 public enum OrderPaymentStatus
 {
