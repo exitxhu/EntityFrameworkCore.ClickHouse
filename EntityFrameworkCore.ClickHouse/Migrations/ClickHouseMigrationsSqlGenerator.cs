@@ -291,6 +291,11 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
         builder.AppendLine(Dependencies.SqlGenerationHelper.StatementTerminator);
         EndStatement(builder);
     }
+    protected override void Generate(DropTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
+    {
+        operation.Schema = default;
+        base.Generate(operation, model, builder, terminate);
+    }
     protected override void Generate(RenameTableOperation operation, IModel model, MigrationCommandListBuilder builder)
     {
         var models = model.GetEntityTypes();
