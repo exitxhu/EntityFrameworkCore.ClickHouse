@@ -56,6 +56,9 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     protected override void Generate(DropIndexOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
     }
+    protected override void Generate(DropSchemaOperation operation, IModel model, MigrationCommandListBuilder builder)
+    {
+    }
     protected override void Generate(DropPrimaryKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
     }
@@ -251,7 +254,6 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
     }
     protected override void Generate(CreateTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
     {
-        Debugger.Launch();
         var models = model.GetEntityTypes();
         var thisType = models.FirstOrDefault(a => a.GetTableName() == operation.Name);
         var thisAnnotaions = thisType.GetAnnotations().ToList();
