@@ -436,7 +436,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
             groups.Add(propertyInfo, properties.Values.ToList());
         }
 
-        if (table.EntityTypeMappings.Any(m => m.EntityType == entityType))
+        if (table.EntityTypeMappings.Any(m => (m.TypeBase as IEntityType) == entityType))
         {
             foreach (var linkingForeignKey in table.GetReferencingRowInternalForeignKeys(entityType))
             {
@@ -512,7 +512,7 @@ public class ClickHouseMigrationsSqlGenerator : MigrationsSqlGenerator
                     .SelectMany(p => groups[p]));
     }
     private static IEntityType GetMainType(ITable table)
-        => table.EntityTypeMappings.First(t => t.IsSharedTablePrincipal ?? true).EntityType;
+        => table.EntityTypeMappings.First(t => t.IsSharedTablePrincipal ?? true).TypeBase as IEntityType;
     protected virtual IEnumerable<MigrationOperation> Add(IUniqueConstraint target)
     {
         if (target.GetIsPrimaryKey())

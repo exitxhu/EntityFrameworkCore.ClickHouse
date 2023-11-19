@@ -14,7 +14,7 @@ namespace ClickHouse.EntityFrameworkCore.Metadata.Internal
         public override IEnumerable<IAnnotation> For(ITable table, bool designTime)
         {
 
-            var entityType = table.EntityTypeMappings.First().EntityType;
+            var entityType = table.EntityTypeMappings.First().TypeBase.ContainingEntityType;
 
             foreach (var annotation in entityType.GetAnnotations()
                 .Where(e => e.Name.StartsWith(ClickHouseAnnotationNames.Prefix)))

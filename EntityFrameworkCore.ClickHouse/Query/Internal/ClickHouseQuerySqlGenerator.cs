@@ -96,9 +96,9 @@ namespace ClickHouse.EntityFrameworkCore.Query.Internal
             return sqlParameterExpression;
         }
 
-        protected override Expression VisitExists(ExistsExpression existsExpression)
+        protected override  void GenerateExists(ExistsExpression existsExpression, bool negated)
         {
-            if (existsExpression.IsNegated)
+            if (negated)
             {
                 Sql.Append("NOT ");
             }
@@ -112,7 +112,7 @@ namespace ClickHouse.EntityFrameworkCore.Query.Internal
                     // Naked set operation
                     GenerateSetOperation((SetOperationBase)existsExpression.Subquery.Tables[0]);
 
-                    return existsExpression.Subquery;
+                    Visit(existsExpression.Subquery);
                 }
 
                 IDisposable subQueryIndent = null;
@@ -170,8 +170,6 @@ namespace ClickHouse.EntityFrameworkCore.Query.Internal
                     //    .Append(")" + AliasSeparator + Sql.DelimitIdentifier(existsExpression.Subquery.Alias));
                 }
             }
-
-            return existsExpression;
         }
         
         private bool IsNonComposedSetOperation(SelectExpression selectExpression)

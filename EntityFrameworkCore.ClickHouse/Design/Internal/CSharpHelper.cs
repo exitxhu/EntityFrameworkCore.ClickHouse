@@ -14,12 +14,18 @@ using System.Collections;
 using Microsoft.EntityFrameworkCore.Internal;
 using ClickHouse.EntityFrameworkCore.Storage.Engines;
 using ClickHouse.EntityFrameworkCore.Metadata;
+using Microsoft.CodeAnalysis.Simplification;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace ClickHouse.EntityFrameworkCore.Design.Internal;
 
 public class ClickHouseCSharpHelper : ICSharpHelper
 {
     private readonly ITypeMappingSource _typeMappingSource;
+    private readonly LinqToCSharpSyntaxTranslator _translator;
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -29,7 +35,15 @@ public class ClickHouseCSharpHelper : ICSharpHelper
     /// </summary>
     public ClickHouseCSharpHelper(ITypeMappingSource typeMappingSource)
     {
+        var workspace = new AdhocWorkspace();
+
+        var projectId = ProjectId.CreateNewId();
+        var versionStamp = VersionStamp.Create();
+        var projectInfo = ProjectInfo.Create(projectId, versionStamp, "Proj", "Proj", LanguageNames.CSharp);
         _typeMappingSource = typeMappingSource;
+        _project = workspace.AddProject(projectInfo);
+        var syntaxGenerator = SyntaxGenerator.GetGenerator(workspace, LanguageNames.CSharp);
+        _translator = new LinqToCSharpSyntaxTranslator(syntaxGenerator);
     }
 
     private static readonly IReadOnlyCollection<string> Keywords = new[]
@@ -116,6 +130,7 @@ public class ClickHouseCSharpHelper : ICSharpHelper
         "volatile",
         "while"
     };
+    private readonly Project _project;
 
     private static readonly IReadOnlyDictionary<Type, Func<ClickHouseCSharpHelper, object, string>> LiteralFuncs =
         new Dictionary<Type, Func<ClickHouseCSharpHelper, object, string>>
@@ -1579,4 +1594,23 @@ public class ClickHouseCSharpHelper : ICSharpHelper
     {
         return Literal(value, false);
     }
+
+    public string Statement(Expression node, ISet<string> collectedNamespaces) => ToSourceCode(_translator.TranslateStatement(node, collectedNamespaces));
+
+
+    public string Expression(Expression node, ISet<string> collectedNamespaces) => ToSourceCode(_translator.TranslateExpression(node, collectedNamespaces));
+    private string ToSourceCode(SyntaxNode node)
+    {
+        var code = node.NormalizeWhitespace().ToFullString();
+        var document = _project.AddDocument("Code.cs", SourceText.From(code));
+
+        var syntaxRootFoo = document.GetSyntaxRootAsync().Result!;
+        var annotatedDocument = document.WithSyntaxRoot(syntaxRootFoo.WithAdditionalAnnotations(Simplifier.Annotation));
+        document = Simplifier.ReduceAsync(annotatedDocument).Result;
+
+        var simplifiedCode = document.GetTextAsync().Result.ToString();
+
+        return simplifiedCode;
+    }
+
 }
