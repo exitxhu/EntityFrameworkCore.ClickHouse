@@ -53,3 +53,12 @@ you can chain them as well.
             entityType.HasCreateStrategy(TableCreationStrategy.CREATE);
             entityType.HasPostGresEngine();
         }
+
+
+# Limitations:
+* Clickhouse dont suport some fimiliar syntaxes (atleast right now) like putting condition in subqueries:
+`
+select a.name,(select sum(b.count) from b where b.id = a.id) from a
+`
+which means you cannot use
+` context.A.Select(a=>new {a.name, count = a.Bs.Sum(b=>b.count)})`
