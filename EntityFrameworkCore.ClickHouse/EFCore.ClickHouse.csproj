@@ -22,11 +22,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ClickHouse.Client" Version="6.8.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" PrivateAssets="none" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" PrivateAssets="none" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.0" PrivateAssets="none" />
+		<PackageReference Include="ClickHouse.Client" Version="7.4.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4" PrivateAssets="none" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.4" PrivateAssets="none" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.4" PrivateAssets="none" />
 	</ItemGroup>
 
 	<ItemGroup>

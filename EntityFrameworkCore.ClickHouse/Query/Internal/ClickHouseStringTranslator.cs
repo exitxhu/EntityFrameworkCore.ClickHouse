@@ -42,7 +42,10 @@ namespace ClickHouse.EntityFrameworkCore.Query.Internal
 
         private static readonly MethodInfo EndsWith = typeof(string)
             .GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) });
-        
+
+        private static readonly MethodInfo Contains = typeof(string)
+            .GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) });
+
         private readonly ISqlExpressionFactory _sqlExpressionFactory;
         
         public ClickHouseStringTranslator([NotNull]ISqlExpressionFactory sqlExpressionFactory)
@@ -134,7 +137,15 @@ namespace ClickHouse.EntityFrameworkCore.Query.Internal
                     argumentsPropagateNullability: new[] { true },
                     returnType: method.ReturnType);
             }
-
+            if (Contains.Equals(method))
+            {
+                return _sqlExpressionFactory.Function(
+                    name: "endsWith",
+                    arguments: arguments.Prepend(instance),
+                    nullable: true,
+                    argumentsPropagateNullability: new[] { true },
+                    returnType: method.ReturnType);
+            }
             return null;
         }
 

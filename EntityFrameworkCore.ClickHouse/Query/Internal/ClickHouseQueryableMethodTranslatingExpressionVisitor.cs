@@ -4,48 +4,50 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
-namespace ClickHouse.EntityFrameworkCore.Query.Internal
+namespace ClickHouse.EntityFrameworkCore.Query.Internal;
+
+public class ClickHouseQueryableMethodTranslatingExpressionVisitor
+    : RelationalQueryableMethodTranslatingExpressionVisitor
 {
-    public class ClickHouseQueryableMethodTranslatingExpressionVisitor
-        : RelationalQueryableMethodTranslatingExpressionVisitor
+    private readonly RelationalSqlTranslatingExpressionVisitor _sqlTranslator;
+
+    public ClickHouseQueryableMethodTranslatingExpressionVisitor(
+        QueryableMethodTranslatingExpressionVisitorDependencies dependencies, 
+        RelationalQueryableMethodTranslatingExpressionVisitorDependencies relationalDependencies,
+        QueryCompilationContext queryCompilationContext) : base(dependencies, relationalDependencies, queryCompilationContext)
     {
-        private readonly RelationalSqlTranslatingExpressionVisitor _sqlTranslator;
+        _sqlTranslator =
+            relationalDependencies.RelationalSqlTranslatingExpressionVisitorFactory.Create(queryCompilationContext,
+                this);
+    }
 
-        public ClickHouseQueryableMethodTranslatingExpressionVisitor(QueryableMethodTranslatingExpressionVisitorDependencies dependencies, RelationalQueryableMethodTranslatingExpressionVisitorDependencies relationalDependencies, QueryCompilationContext queryCompilationContext) : base(dependencies, relationalDependencies, queryCompilationContext)
+    protected override Expression VisitConstant(ConstantExpression constantExpression)
+    {
+        return base.VisitConstant(constantExpression);
+    }
+
+    protected override ShapedQueryExpression TranslateTake(ShapedQueryExpression source, Expression count)
+    {
+        if (source == null)
         {
-            _sqlTranslator =
-                relationalDependencies.RelationalSqlTranslatingExpressionVisitorFactory.Create(queryCompilationContext,
-                    this);
+            throw new ArgumentNullException(nameof(source));
         }
 
-        protected override Expression VisitConstant(ConstantExpression constantExpression)
+        if (count == null)
         {
-            return base.VisitConstant(constantExpression);
+            throw new ArgumentNullException(nameof(count));
         }
 
-        protected override ShapedQueryExpression TranslateTake(ShapedQueryExpression source, Expression count)
+        var selectExpression = (SelectExpression)source.QueryExpression;
+        var translation = _sqlTranslator.Translate(count);
+
+        if (translation != null)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
+            selectExpression.ApplyLimit(translation);
 
-            if (count == null)
-            {
-                throw new ArgumentNullException(nameof(count));
-            }
-
-            var selectExpression = (SelectExpression)source.QueryExpression;
-            var translation = _sqlTranslator.Translate(count);
-
-            if (translation != null)
-            {
-                selectExpression.ApplyLimit(translation);
-
-                return source;
-            }
-
-            return null;
+            return source;
         }
+
+        return null;
     }
 }
